@@ -1,15 +1,3 @@
-/*
-Copyright (C) 2012 Ian Bradley
-
-This file is part of Glaukaba-JS.
-
-Glaukaba-JS is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-Glaukaba-JS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with Glaukaba-JS. If not, see http://www.gnu.org/licenses/.
-*/
-
 var isOn = 0;
 var updaterTimer;
 var updaterTimeLeft;
@@ -271,6 +259,7 @@ function titleFactory(mode) {
         document.title = "(" + postsInTitle + ") " + $(".parentPost").children('blockquote').first().text();
         $('.unreadMarker').css('box-shadow', '');
         $('.reply.newPost').attr('class', 'reply');
+        $('.reply.unreadMarker').attr('class', 'reply');
         $('.reply.newPost.highlight').attr('class', 'reply highlight');
       }
     }
@@ -317,6 +306,7 @@ function doIt(again) {
   if (localStorage.getItem('inlineQuote') == 'true') {
     $("a.postlink").removeAttr("onclick");
   }
+  prettyPrint();
 }
 
 function expandPost(link) {
@@ -673,6 +663,10 @@ function threadUpdater() {
           newPosts.push(makeReply(post));
         }
       });
+      if (postsInTitle == 0) {
+        $('.thread').last().children().last().children('.reply').attr('class', 'reply unreadMarker');
+        $('.thread').last().children().last().children('.reply').css('box-shadow', '0 3px red');
+      }
       $(newPosts).find('.replyPostInfo').children('span').after("&nbsp;");
       $('.thread').append(newPosts);
       postsInTitle = $('.reply.newPost').length;
@@ -771,35 +765,75 @@ function makeReply(post) {
   menuReport.setAttribute('onclick', 'reportPostPopup(' + post.no + ',\'' + board + '\')');
   menuReport.setAttribute('class', 'postMenuItem');
   menuReport.innerHTML = "Report this post";
+  $(postMenu).append(menuReport);
   var deleteMenu = document.createElement('div');
   deleteMenu.setAttribute('onmouseover', 'showSub(this);');
-  deleteMenu.innerHTML = "<span class='postMenuItem'>Delete</span><div onmouseover$(this).addClass('focused') class='postMenu subMenu' style='display:none';><a class='postMenuItem' href='javascript:void(0);' onclick='deletePost(" + post.no + ");'>Post</a><a class='postMenuItem' href='javascript:void(0);' onclick='deleteImage(" + post.no + ");'>Post</a></div>";
+  deleteMenu.setAttribute('class', 'hasSubMenu');
+  deleteMenu.innerHTML = "<span class='postMenuItem'>Delete</span><div onmouseover$(this).addClass('focused') class='postMenu subMenu' style='display:none';><a class='postMenuItem' href='javascript:void(0);' onclick='deletePost(" + post.no + ");'>Post</a><a class='postMenuItem' href='javascript:void(0);' onclick='deleteImage(" + post.no + ");'>Image</a></div>";
+  $(postMenu).append(deleteMenu);
   var filterMenu = document.createElement('div');
   filterMenu.setAttribute('onmouseover', 'showSub(this);');
+  filterMenu.setAttribute('class', 'hasSubMenu');
   filterMenu.innerHTML = "<span class='postMenuItem'>Filter</span><div class='postMenu subMenu' style='display:none'><a class='postMenuItem' href='javascript:void(0)'>Not yet implemented</a></div>";
+  $(postMenu).append(filterMenu);
   var facebookButton = document.createElement('div');
   facebookButton.setAttribute('onmouseover', 'closeSub(this)');
   facebookButton.setAttribute('href', 'javascript:void(0)');
   facebookButton.setAttribute('onclick', 'facebookPost(window.location.hostname,' + post.no + ',' + post.parent + ')');
   facebookButton.setAttribute('class', 'postMenuItem');
   facebookButton.innerHTML = "Post to Facebook";
+  $(postMenu).append(facebookButton);
   var twitterButton = document.createElement('div');
   twitterButton.setAttribute('onmouseover', 'closeSub(this)');
   twitterButton.setAttribute('href', 'javascript:void(0)');
   twitterButton.setAttribute('onclick', 'twitterPost(window.location.hostname,' + post.no + ',' + post.parent + ')');
   twitterButton.setAttribute('class', 'postMenuItem');
   twitterButton.innerHTML = "Post to Twitter";
+  $(postMenu).append(twitterButton);
   var permaLink = document.createElement('a');
   permaLink.setAttribute('href', 'http://' + window.location.hostname + '/' + board + '/res/' + post.parent + '#' + post.no);
   permaLink.setAttribute('class', 'postMenuItem');
   permaLink.setAttribute('target', '_blank');
+  permaLink.innerHTML = "Permalink";
+  $(postMenu).append(permaLink);
   var blockquote = document.createElement('blockquote');
   blockquote.innerHTML = post.com;
+  if (post.filename) {
+    var fileSize = document.createElement('span');
+    fileSize.setAttribute('class', 'filesize');
+    var filename = post.filename.substring(0, post.filename.lastIndexOf("."));
+    filename = filename.replace("src/", "");
+    if (filename.length > 25) {
+      filename = filename.substring(0, 25) + '(...)' + post.filename.substring(post.filename.lastIndexOf("."));
+    } else {
+      filename = post.filename;
+    }
+    fileSize.innerHTML = "File: <a target='_blank' href='http://" + window.location.hostname + "/" + board + "/" + post.image + "'>" + filename + "</a> -(" + Math.round(post.fsize / 1000) + " KB, " + post.w + "x" + post.h + ")";
+    var thumbLink = document.createElement('a');
+    thumbLink.setAttribute('class', 'thumbLink');
+    thumbLink.setAttribute('target', '_blank');
+    thumbLink.setAttribute('href', "http://" + window.location.hostname + "/" + board + "/" + post.image);
+    var thumbnail = document.createElement('img');
+    thumbnail.setAttribute('class', 'thumb replyThumb');
+    filename = post.image.substring(0, post.image.lastIndexOf(".")) + "s.jpg";
+    filename = filename.replace("src/", "thumb/");
+    thumbnail.setAttribute('src', "http://" + window.location.hostname + "/" + board + "/" + filename);
+    thumbnail.setAttribute('alt', post.fsize);
+    thumbnail.setAttribute('data-md5', post.md5);
+    thumbnail.setAttribute('style', "width:" + post.tn_w * .504 + "px;height:" + post.tn_h * .504 + "px;");
+    $(thumbLink).append(thumbnail);
+  }
   $(replyContainer).append(doubledash);
   $(reply).append(a);
-  $(replyPostInfo).append();
+  $(replyPostInfo).append(postMenuButton);
   $(reply).append(replyPostInfo);
   $(reply).append(postMenu);
+  if (post.filename) {
+    $(reply).append("<br />");
+    $(reply).append(fileSize);
+    $(reply).append("<br />");
+    $(reply).append(thumbLink);
+  }
   $(reply).append(blockquote);
   $(replyContainer).append(reply);
   return replyContainer;
