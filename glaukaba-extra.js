@@ -540,12 +540,13 @@ function quotePreview(reference, mode) {
       div.className = "reply";
       div.style.position = "absolute";
       div.style.border = "1px solid grey";
-      $.get(reference.href, function (data) {
-        var loadedPost = $(data).find('#' + referencedPostNumber).html();
-        if (loadedPost == null) {
-          loadedPost = $(data).find('#' + referencedPostNumber.replace('reply', 'parent')).html();
-        }
-        div.innerHTML = loadedPost;
+      $.getJSON(reference.href.replace(/#.*/i, "") + ".json", function (data) {
+        $.each(data.posts, function (index, post) {
+          if (post.no == referencedPostNumber.replace("reply", "")) {
+            $(div).html($(makeReply(post)).children('.reply').last().html());
+          }
+        });
+        $(div).children('.replyPostInfo').children('span').after("&nbsp;");
       });
       var previewOffsetY = div.offsetHeight;
       $(document).mousemove(function (e) {
@@ -553,13 +554,6 @@ function quotePreview(reference, mode) {
         div.style.left = (e.pageX + 50) + "px";
       });
       if (document.getElementById(div.id) == null) {
-        $(div).find('div[id^=inlineQuote]').remove();
-        $(div).find('div[id^=backlinkInlineQuote]').remove();
-        if ($(div).find('a.thumbLink').children('img.expandedThumb').length) {
-          $(div).find('a.thumbLink').each(function (e) {
-            expandImage(this)
-          });
-        }
         document.body.appendChild(div);
       }
     }
@@ -619,20 +613,15 @@ function inlineQuote(reference, url, mode, backlink) {
     }
   } else {
     if (alreadyQuote == undefined) {
-      $.get(reference.href, function (data) {
-        var loadedPost = $(data).find('#' + referencedPostNumber);
-        if (loadedPost == null) {
-          loadedPost = $(data).find('#' + referencedPostNumber.replace('reply', 'parent'));
-        }
-        div = $($(data).find('#' + referencedPostNumber)).clone(true, true);
+      $.getJSON(reference.href.replace(/#.*/i, "") + ".json", function (data) {
+        $.each(data.posts, function (index, post) {
+          if (post.no == referencedPostNumber.replace("reply", "")) {
+            div = document.createElement('div');
+            $(div).html($(makeReply(post)).children('.reply').last().html());
+          }
+        });
         $(div).attr("id", "inlineQuote" + referencedPostNumber);
-        $(div).find('div[id^=inlineQuote]').remove();
-        $(div).find('div[id^=backlinkInlineQuote]').remove();
-        if ($(div).find('a.thumbLink').children('img.expandedThumb').length) {
-          $(div).find('a.thumbLink').each(function (e) {
-            expandImage(this)
-          });
-        }
+        $(div).children('.replyPostInfo').children('span').after("&nbsp;");
         $(div).css("border", "1px solid grey");
         $(div).css("display", "table");
         $(reference).after(div);
@@ -735,7 +724,7 @@ function makeReply(post) {
   $(replyPostInfo).append(postertrip);
   var datespan = document.createElement('span');
   datespan.setAttribute('class', 'date');
-  datespan.innerHTML = post.date;
+  datespan.innerHTML = post.now;
   $(replyPostInfo).append(datespan);
   var idspan = document.createElement('span');
   idspan.setAttribute('class', 'id');
