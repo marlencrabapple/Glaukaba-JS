@@ -1,3 +1,15 @@
+/*
+Copyright (C) 2012 Ian Bradley
+
+This file is part of Glaukaba-JS.
+
+Glaukaba-JS is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+Glaukaba-JS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with Glaukaba-JS. If not, see http://www.gnu.org/licenses/.
+*/
+
 var isOn = 0;
 var updaterTimer;
 var updaterTimeLeft;
@@ -11,13 +23,11 @@ var settings = ['qRep', 'inlineExpansion', 'threadUpdater', 'quotePreview', 'rep
 var hasCaptcha = 0;
 var postsInTitle = 0;
 var finalDivScrollPos;
+
 function setQrInputs() {
-  document.getElementById("qrField1")
-    .value = get_cookie("name");
-  document.getElementById("qrField2")
-    .value = get_cookie("email");
-  document.getElementById("qrPassword")
-    .value = get_password("password");
+  document.getElementById("qrField1").value = get_cookie("name");
+  document.getElementById("qrField2").value = get_cookie("email");
+  document.getElementById("qrPassword").value = get_password("password");
 }
 
 function toggleFeature(feature, value) {
@@ -27,28 +37,23 @@ function toggleFeature(feature, value) {
 function loadSavedSettings() {
   for (var i = 0; i < settings.length; i++) {
     if ((localStorage.getItem(settings[i]) == 'false') || (localStorage.getItem(settings[i]) == null)) {
-      document.getElementById(settings[i])
-        .checked = "";
+      document.getElementById(settings[i]).checked = "";
     } else {
-      document.getElementById(settings[i])
-        .checked = "checked";
+      document.getElementById(settings[i]).checked = "checked";
     }
   }
 }
 
 function imgExpPrep() {
-  $("body")
-    .on("click", "a.thumbLink", function (e) {
+  $("body").on("click", "a.thumbLink", function (e) {
     expandImage(this);
     e.preventDefault();
   });
 }
 
 function qrPrep() {
-  var board = document.getElementById('forJs')
-    .innerHTML;
-  $("body")
-    .on("click", "a.refLinkInner", function (e) {
+  var board = document.getElementById('forJs').innerHTML;
+  $("body").on("click", "a.refLinkInner", function (e) {
     quickReply(this, board);
     e.preventDefault();
   });
@@ -56,19 +61,15 @@ function qrPrep() {
 
 function quotePreviewPrep() {
   var varReferences = document.getElementsByClassName("postlink");
-  $("body")
-    .on("mouseover", "a.postlink", function () {
+  $("body").on("mouseover", "a.postlink", function () {
     quotePreview(this, 0)
   });
-  $("body")
-    .on("mouseout", "a.postlink", function () {
+  $("body").on("mouseout", "a.postlink", function () {
     quotePreview(this, 1)
   });
   if (localStorage.getItem('inlineQuote') == 'true') {
-    $("a.postlink")
-      .removeAttr("onclick");
-    $("body")
-      .on("click", "a.postlink", function (e) {
+    $("a.postlink").removeAttr("onclick");
+    $("body").on("click", "a.postlink", function (e) {
       inlineQuote(this, this.href, 0);
       e.preventDefault();
     });
@@ -159,13 +160,9 @@ function replyBacklinkingPrep() {
       referencedPost = referencedPost.replace(" (OP)", "");
       if (postNumbers[a].innerHTML.indexOf(referencedPost) != -1) {
         var backlink = document.createElement("a");
-        var postReferenced = $(references[i])
-          .parents()
-          .map(function () {
+        var postReferenced = $(references[i]).parents().map(function () {
           return this.id;
-        })
-          .get()
-          .join(',');
+        }).get().join(',');
         if (postReferenced.indexOf("reply") != -1) {
           var postReferencedId = "reply" + referencedPost.replace("No.", "");
           postReferenced = postReferenced.split(',');
@@ -190,19 +187,16 @@ function replyBacklinkingPrep() {
           backlink.href = "javascript:void(0);"
           backlink.id = "backlink" + postReferenced;
           backlink.style.paddingRight = "3px";
-          $(backlink)
-            .bind('mouseover', function (e) {
+          $(backlink).bind('mouseover', function (e) {
             quotePreview(this, 0);
             e.preventDefault();
           });
-          $(backlink)
-            .bind('mouseout', function (e) {
+          $(backlink).bind('mouseout', function (e) {
             quotePreview(this, 1);
             e.preventDefault();
           });
           if (localStorage.getItem('inlineQuote') == 'true') {
-            $(backlink)
-              .bind('click', function (a) {
+            $(backlink).bind('click', function (a) {
               inlineQuote(this, this.href, 0, 1);
               a.preventDefault();
             });
@@ -218,84 +212,47 @@ function replyBacklinkingPrep() {
 
 function highlightPosts(identifier) {
   if (identifier != undefined) {
-    $(".reply.highlight")
-      .attr("class", "reply");
+    $(".reply.highlight").attr("class", "reply");
     if (identifier.className == "postername") {
       if (identifier.firstElementChild != null) {
         if (identifier.firstElementChild.className == "adminName") {
-          console.log($(identifier)
-            .text());
-          var thread = $(identifier)
-            .parentsUntil("div.thread")
-            .parent()[0];
-          $(thread)
-            .children("div.replyContainer")
-            .children('div.reply:contains("## Admin")')
-            .attr('class', 'reply highlight');
+          console.log($(identifier).text());
+          var thread = $(identifier).parentsUntil("div.thread").parent()[0];
+          $(thread).children("div.replyContainer").children('div.reply:contains("## Admin")').attr('class', 'reply highlight');
         }
       } else if (identifier.nextElementSibling.className == "postertrip") {
         identifier = identifier.nextElementSibling;
-        console.log($(identifier)
-          .text());
-        var thread = $(identifier)
-          .parentsUntil("div.thread")
-          .parent()[0];
-        $(thread)
-          .children("div.replyContainer")
-          .children('div.reply:contains("' + $(identifier)
-          .text() + '")')
-          .attr('class', 'reply highlight');
+        console.log($(identifier).text());
+        var thread = $(identifier).parentsUntil("div.thread").parent()[0];
+        $(thread).children("div.replyContainer").children('div.reply:contains("' + $(identifier).text() + '")').attr('class', 'reply highlight');
       } else {
         console.log("Nothing to identify by");
       }
     } else if (identifier.className == "postertrip") {
       if (identifier.firstElementChild != null) {
         if (identifier.firstElementChild.className == "adminTrip") {
-          console.log($(identifier)
-            .text());
-          var thread = $(identifier)
-            .parentsUntil("div.thread")
-            .parent()[0];
-          $(thread)
-            .children("div.replyContainer")
-            .children('div.reply:contains("## Admin")')
-            .attr('class', 'reply highlight');
+          console.log($(identifier).text());
+          var thread = $(identifier).parentsUntil("div.thread").parent()[0];
+          $(thread).children("div.replyContainer").children('div.reply:contains("## Admin")').attr('class', 'reply highlight');
         }
       } else {
-        console.log($(identifier)
-          .text());
-        var thread = $(identifier)
-          .parentsUntil("div.thread")
-          .parent()[0];
-        $(thread)
-          .children("div.replyContainer")
-          .children('div.reply:contains("' + $(identifier)
-          .text() + '")')
-          .attr('class', 'reply highlight');
+        console.log($(identifier).text());
+        var thread = $(identifier).parentsUntil("div.thread").parent()[0];
+        $(thread).children("div.replyContainer").children('div.reply:contains("' + $(identifier).text() + '")').attr('class', 'reply highlight');
       }
     } else if (identifier.className == "id") {
-      console.log($(identifier)
-        .text());
-      var thread = $(identifier)
-        .parentsUntil("div.thread")
-        .parent()[0];
-      $(thread)
-        .children("div.replyContainer")
-        .children('div.reply:contains(' + $(identifier)
-        .text() + ')')
-        .attr('class', 'reply highlight');
+      console.log($(identifier).text());
+      var thread = $(identifier).parentsUntil("div.thread").parent()[0];
+      $(thread).children("div.replyContainer").children('div.reply:contains(' + $(identifier).text() + ')').attr('class', 'reply highlight');
     }
   } else {
-    $("body")
-      .on("click", "span.postername", function () {
+    $("body").on("click", "span.postername", function () {
       highlightPosts(this)
     });
-    $("body")
-      .on("click", "span.postertrip", function () {
+    $("body").on("click", "span.postertrip", function () {
       highlightPosts(this)
     });
-    $("body")
-      .on("click", "span.id", function () {
+    $("body").on("click", "span.id", function () {
       highlightPosts(this)
     });
   }
@@ -303,44 +260,26 @@ function highlightPosts(identifier) {
 
 function titleFactory(mode) {
   if (mode == 1) {
-    finalDivScrollPos = $('.reply.newPost')
-      .last()
-      .scrollTop();
+    finalDivScrollPos = $('.reply.newPost').last().scrollTop();
     console.log(finalDivScrollPos);
-    document.title = "(" + postsInTitle + ") " + $(".parentPost")
-      .children('blockquote')
-      .first()
-      .text();
+    document.title = "(" + postsInTitle + ") " + $(".parentPost").children('blockquote').first().text();
     return;
   } else if (isOn == 1) {
-    if ($('.newPost')
-      .last()
-      .length) {
-      if (($(document)
-        .scrollTop() - 100) > ($('.newPost')
-        .last()
-        .offset()
-        .top - $(window)
-        .height())) {
+    if ($('.newPost').last().length) {
+      if (($(document).scrollTop() - 100) > ($('.newPost').last().offset().top - $(window).height())) {
         postsInTitle = 0;
-        document.title = "(" + postsInTitle + ") " + $(".parentPost")
-          .children('blockquote')
-          .first()
-          .text();
-        $('.unreadMarker')
-          .css('box-shadow', '');
-        $('.reply.newPost')
-          .attr('class', 'reply');
-        $('.reply.newPost.highlight')
-          .attr('class', 'reply highlight');
+        document.title = "(" + postsInTitle + ") " + $(".parentPost").children('blockquote').first().text();
+        $('.unreadMarker').css('box-shadow', '');
+        $('.reply.newPost').attr('class', 'reply');
+        $('.reply.newPost.highlight').attr('class', 'reply highlight');
       }
     }
   }
 }
-$(document)
-  .scroll(function () {
+$(document).scroll(function () {
   titleFactory()
 });
+
 function doIt(again) {
   if (!again) {
     if (localStorage.getItem('qRep') == 'true') {
@@ -376,53 +315,35 @@ function doIt(again) {
     replyBacklinkingPrep();
   }
   if (localStorage.getItem('inlineQuote') == 'true') {
-    $("a.postlink")
-      .removeAttr("onclick");
+    $("a.postlink").removeAttr("onclick");
   }
 }
 
 function expandPost(link) {
   if (link.hash) {
     $.get(link, function (data) {
-      var loadedPost = $(data)
-        .find("#reply" + link.hash.replace("#", ""));
-      document.getElementById("reply" + link.hash.replace("#", ""))
-        .lastElementChild.innerHTML = $(loadedPost)
-        .find("blockquote")
-        .last()
-        .html();
+      var loadedPost = $(data).find("#reply" + link.hash.replace("#", ""));
+      document.getElementById("reply" + link.hash.replace("#", "")).lastElementChild.innerHTML = $(loadedPost).find("blockquote").last().html();
     });
   } else {
     $.get(link, function (data) {
-      var loadedPost = $(data)
-        .find("#parent" + link.pathname.substring(link.pathname.lastIndexOf("/") + 1));
-      document.getElementById("parent" + link.pathname.substring(link.pathname.lastIndexOf("/") + 1))
-        .lastElementChild.innerHTML = $(loadedPost)
-        .find("blockquote")
-        .last()
-        .html();
+      var loadedPost = $(data).find("#parent" + link.pathname.substring(link.pathname.lastIndexOf("/") + 1));
+      document.getElementById("parent" + link.pathname.substring(link.pathname.lastIndexOf("/") + 1)).lastElementChild.innerHTML = $(loadedPost).find("blockquote").last().html();
     });
   }
 }
 
 function expandThread(parentDivId, mode) {
-  var board = document.getElementById('forJs')
-    .innerHTML;
+  var board = document.getElementById('forJs').innerHTML;
   var threadLink = window.location.hostname + "/" + board + "/res/" + parentDivId.replace("parent", "");
   if (mode == 0) {
     $.get(threadLink, function (data) {
-      var loadedThread = $(data)
-        .find(".replyContainer");
-      var omittext = $($('#' + parentDivId)
-        .next())
-        .html();
+      var loadedThread = $(data).find(".replyContainer");
+      var omittext = $($('#' + parentDivId).next()).html();
       omittext = omittext.replace("+", "-");
       omittext = omittext.replace(",0", ",1");
-      $($('#' + parentDivId)
-        .siblings())
-        .hide();
-      $($(loadedThread))
-        .insertAfter('#' + parentDivId);
+      $($('#' + parentDivId).siblings()).hide();
+      $($(loadedThread)).insertAfter('#' + parentDivId);
       hideReplyPrep();
     });
   } else {
@@ -454,11 +375,8 @@ function anonymize() {
 function recaptchaRefresh() {
   if (hasCaptcha == 1) {
     Recaptcha.reload("t");
-    document.getElementById("recaptcha_image")
-      .addEventListener("DOMNodeInserted", function (e) {
-      document.getElementById("qrCaptcha")
-        .innerHTML = document.getElementById("recaptchaContainer")
-        .innerHTML;
+    document.getElementById("recaptcha_image").addEventListener("DOMNodeInserted", function (e) {
+      document.getElementById("qrCaptcha").innerHTML = document.getElementById("recaptchaContainer").innerHTML;
     }, false);
   }
 }
@@ -470,12 +388,10 @@ function quickReply(refLink, board) {
   var parent;
   var addons;
   if (document.getElementById("recaptchaContainer")) {
-    document.getElementById("recaptcha_reload_btn")
-      .href = "javascript:recaptchaRefresh();";
+    document.getElementById("recaptcha_reload_btn").href = "javascript:recaptchaRefresh();";
     var recaptchaInsert = document.createElement('div');
     recaptchaInsert.id = "recaptchaInsert";
-    recaptchaInsert.innerHTML = document.getElementById("recaptchaContainer")
-      .innerHTML;
+    recaptchaInsert.innerHTML = document.getElementById("recaptchaContainer").innerHTML;
     hasCaptcha = 1;
   } else {
     var recaptchaInsert = document.createElement('div');
@@ -486,71 +402,58 @@ function quickReply(refLink, board) {
   } else {
     var addons = '';
   }
-  parent = $(refLink)
-    .parentsUntil("div.thread")
-    .parent()[0].firstElementChild.id.replace("parent", "");
+  parent = $(refLink).parentsUntil("div.thread").parent()[0].firstElementChild.id.replace("parent", "");
   console.log(parent);
   if (document.getElementById("quickReply") == null) {
     document.body.appendChild(_div);
     _div.innerHTML += '<span>Quick Reply</span><a href="javascript:void(0)" style="float: right" onclick="closeQuickReply();">[ x ]</a><form id="qrActualForm" action="/' + board + '/wakaba.pl" method="post" enctype="multipart/form-data"> <input type="hidden" name="task" value="post"> <input type="hidden" name="parent" value=' + parent + '> <div class="trap">Leave these fields empty (spam trap): <input type="text" name="name" autocomplete="off"><input type="text" name="link" autocomplete="off"></div> <div id="qrPostForm"> <div class="postTableContainer"> <div class="postBlock">Name</div> <div class="postSpacer"></div> <div class="postField"><input type="text" class="postInput" name="field1" id="qrField1"></div> </div> <div class="postTableContainer"> <div class="postBlock">Link</div> <div class="postSpacer"></div> <div class="postField"><input type="text" class="postInput" name="field2" id="qrField2"></div> </div> <div class="postTableContainer"> <div class="postBlock">Subject</div> <div class="postSpacer"></div> <div class="postField"> <input type="text" name="field3" class="postInput" id="qrField3"> <input type="submit" id="qrField3s" value="Submit" onclick="setSubmitText();"> </div> </div> <div class="postTableContainer"> <div class="postBlock">Comment</div> <div class="postSpacer"></div> <div class="postField"><textarea name="field4" class="postInput" id="qrField4"></textarea></div> </div> <div class="postTableContainer" id="qrCaptcha">' + recaptchaInsert.innerHTML + '</div> <div class="postTableContainer"> <div class="postBlock">File</div> <div class="postSpacer"></div> <div class="postField"> <input type="file" name="file" id="file"> <label><input type="checkbox" name="nofile" value="on">No File</label> </div> </div> <div class="postTableContainer"> <div class="postBlock">Password</div> <div class="postSpacer"></div> <div class="postField"><input type="password" class="postInput" id="qrPassword" name="password"> (for post and file deletion)</div> </div> ' + addons + ' <div class="postTableContainer"> </div> <div id="qrErrorStatus" style="color:red"></div> </div> </form>';
-    document.getElementById("quickReply")
-      .childNodes[2].childNodes[7].childNodes[7].childNodes[5].childNodes[0].value += ref + "\n";
+    document.getElementById("quickReply").childNodes[2].childNodes[7].childNodes[7].childNodes[5].childNodes[0].value += ref + "\n";
     setQrInputs("qrPostForm");
     qrAjaxSubmit();
   } else {
-    document.getElementById("quickReply")
-      .childNodes[2].childNodes[7].childNodes[7].childNodes[5].childNodes[0].value += ref + "\n";
+    document.getElementById("quickReply").childNodes[2].childNodes[7].childNodes[7].childNodes[5].childNodes[0].value += ref + "\n";
   }
 }
 
 function setSubmitText() {
-  document.getElementById("qrField3s")
-    .value = "Submitting...";
+  document.getElementById("qrField3s").value = "Submitting...";
 }
 
 function qrAjaxSubmit() {
-  $(document)
-    .ready(function () {
+  $(document).ready(function () {
     var options = {
       error: showResponse,
       success: showResponse
     };
-    $('#qrActualForm')
-      .ajaxForm(options);
+    $('#qrActualForm').ajaxForm(options);
   });
 }
 
 function showResponse(responseText, statusText, xhr, $form) {
   if (responseText.indexOf("errorMessage") == -1) {
-    document.getElementById("qrErrorStatus")
-      .innerHTML = "";
+    document.getElementById("qrErrorStatus").innerHTML = "";
     closeQuickReply();
     if (hasCaptcha == 1) {
       Recaptcha.reload("t");
     }
   } else {
     console.log(responseText);
-    document.getElementById("qrErrorStatus")
-      .innerHTML = "Something went wrong.";
-    document.getElementById("qrField3s")
-      .value = "Try again";
+    document.getElementById("qrErrorStatus").innerHTML = "Something went wrong.";
+    document.getElementById("qrField3s").value = "Try again";
     recaptchaRefresh();
   }
 }
 
 function deleteAjaxSubmit() {
-  $(document)
-    .ready(function () {
-    $('#delform')
-      .ajaxForm(function () {
+  $(document).ready(function () {
+    $('#delform').ajaxForm(function () {
       console.log("Deleted?");
     });
   });
 }
 
 function closeQuickReply() {
-  document.getElementById("quickReply")
-    .innerHTML = "";
+  document.getElementById("quickReply").innerHTML = "";
   document.body.removeChild(document.getElementById("quickReply"));
 }
 
@@ -573,8 +476,7 @@ function expandImage(thumbLink) {
     }
   } else {
     var thumbFname = thumbLink.href.substring(thumbLink.href.lastIndexOf("src/") + 4, thumbLink.href.lastIndexOf("src/") + 17);
-    image.src = "http://" + window.location.hostname + "/" + document.getElementById("forJs")
-      .innerHTML + "/thumb/" + thumbFname + "s.jpg";
+    image.src = "http://" + window.location.hostname + "/" + document.getElementById("forJs").innerHTML + "/thumb/" + thumbFname + "s.jpg";
     image.removeAttribute("style");
     dicks = 1;
     if (image.className.indexOf("opThumb") == -1) {
@@ -599,8 +501,7 @@ function expandImage(thumbLink) {
 }
 
 function expandAllImages() {
-  $('a.thumbLink')
-    .each(function (e) {
+  $('a.thumbLink').each(function (e) {
     expandImage(this)
   });
 }
@@ -615,37 +516,24 @@ function quotePreview(reference, mode) {
   }
   if (document.getElementById(referencedPostNumber) != null) {
     if (mode == 0) {
-      var referencedPost = document.getElementById(referencedPostNumber)
-        .innerHTML;
+      var referencedPost = document.getElementById(referencedPostNumber).innerHTML;
       var div = document.createElement('div');
       div.id = "quotePreview" + referencedPostNumber;
       div.className = "reply";
       div.style.position = "absolute";
       div.style.border = "1px solid grey";
       div.innerHTML = referencedPost;
-      var previewOffsetY = $(div)
-        .height();
-      var previewOffsetX = $(div)
-        .width();
-      $(document)
-        .mousemove(function (e) {
+      var previewOffsetY = $(div).height();
+      var previewOffsetX = $(div).width();
+      $(document).mousemove(function (e) {
         div.style.top = (e.pageY - (previewOffsetY + 10)) + "px";
         div.style.left = (e.pageX + 50) + "px";
       });
       if (document.getElementById(div.id) == null) {
-        $(div)
-          .find('div[id^=inlineQuote]')
-          .remove();
-        $(div)
-          .find('div[id^=backlinkInlineQuote]')
-          .remove();
-        if ($(div)
-          .find('a.thumbLink')
-          .children('img.expandedThumb')
-          .length) {
-          $(div)
-            .find('a.thumbLink')
-            .each(function (e) {
+        $(div).find('div[id^=inlineQuote]').remove();
+        $(div).find('div[id^=backlinkInlineQuote]').remove();
+        if ($(div).find('a.thumbLink').children('img.expandedThumb').length) {
+          $(div).find('a.thumbLink').each(function (e) {
             expandImage(this)
           });
         }
@@ -663,36 +551,22 @@ function quotePreview(reference, mode) {
       div.style.position = "absolute";
       div.style.border = "1px solid grey";
       $.get(reference.href, function (data) {
-        var loadedPost = $(data)
-          .find('#' + referencedPostNumber)
-          .html();
+        var loadedPost = $(data).find('#' + referencedPostNumber).html();
         if (loadedPost == null) {
-          loadedPost = $(data)
-            .find('#' + referencedPostNumber.replace('reply', 'parent'))
-            .html();
+          loadedPost = $(data).find('#' + referencedPostNumber.replace('reply', 'parent')).html();
         }
         div.innerHTML = loadedPost;
       });
       var previewOffsetY = div.offsetHeight;
-      $(document)
-        .mousemove(function (e) {
+      $(document).mousemove(function (e) {
         div.style.top = (e.pageY - (previewOffsetY + 10)) + "px";
         div.style.left = (e.pageX + 50) + "px";
       });
       if (document.getElementById(div.id) == null) {
-        $(div)
-          .find('div[id^=inlineQuote]')
-          .remove();
-        $(div)
-          .find('div[id^=backlinkInlineQuote]')
-          .remove();
-        if ($(div)
-          .find('a.thumbLink')
-          .children('img.expandedThumb')
-          .length) {
-          $(div)
-            .find('a.thumbLink')
-            .each(function (e) {
+        $(div).find('div[id^=inlineQuote]').remove();
+        $(div).find('div[id^=backlinkInlineQuote]').remove();
+        if ($(div).find('a.thumbLink').children('img.expandedThumb').length) {
+          $(div).find('a.thumbLink').each(function (e) {
             expandImage(this)
           });
         }
@@ -714,117 +588,67 @@ function inlineQuote(reference, url, mode, backlink) {
   } else {
     var referencedPostNumber = "parent" + referenceWork.substring(8);
   }
-  var alreadyQuote = $(reference.parentElement.parentElement.parentElement)
-    .find("#inlineQuote" + referencedPostNumber)
-    .attr('id');
+  var alreadyQuote = $(reference.parentElement.parentElement.parentElement).find("#inlineQuote" + referencedPostNumber).attr('id');
   if (backlink == 1) {
-    var alreadyQuote = $(reference.parentElement.parentElement.parentElement)
-      .find("#backlinkInlineQuote" + referencedPostNumber)
-      .attr('id');
+    var alreadyQuote = $(reference.parentElement.parentElement.parentElement).find("#backlinkInlineQuote" + referencedPostNumber).attr('id');
   }
   if (document.getElementById(referencedPostNumber) != null) {
     if (alreadyQuote == undefined) {
-      div = $("#" + referencedPostNumber)
-        .clone(true, true);
-      $(div)
-        .find('div[id^=inlineQuote]')
-        .remove();
-      $(div)
-        .find('div[id^=backlinkInlineQuote]')
-        .remove();
-      if ($(div)
-        .find('a.thumbLink')
-        .children('img.expandedThumb')
-        .length) {
-        $(div)
-          .find('a.thumbLink')
-          .each(function (e) {
+      div = $("#" + referencedPostNumber).clone(true, true);
+      $(div).find('div[id^=inlineQuote]').remove();
+      $(div).find('div[id^=backlinkInlineQuote]').remove();
+      if ($(div).find('a.thumbLink').children('img.expandedThumb').length) {
+        $(div).find('a.thumbLink').each(function (e) {
           expandImage(this)
         });
       }
-      $(div)
-        .attr("id", "inlineQuote" + referencedPostNumber);
-      $(div)
-        .css("border", "1px solid grey");
-      $(div)
-        .css("display", "table");
+      $(div).attr("id", "inlineQuote" + referencedPostNumber);
+      $(div).css("border", "1px solid grey");
+      $(div).css("display", "table");
       if (backlink == 1) {
-        if ($(reference)
-          .nextUntil('blockquote')
-          .length == 0) {
-          $(div)
-            .attr("id", "backlinkInlineQuote" + referencedPostNumber);
-          $(reference)
-            .after(div);
+        if ($(reference).nextUntil('blockquote').length == 0) {
+          $(div).attr("id", "backlinkInlineQuote" + referencedPostNumber);
+          $(reference).after(div);
         } else {
-          $(div)
-            .attr("id", "backlinkInlineQuote" + referencedPostNumber);
-          $(reference)
-            .nextUntil('blockquote')
-            .last()
-            .after(div);
+          $(div).attr("id", "backlinkInlineQuote" + referencedPostNumber);
+          $(reference).nextUntil('blockquote').last().after(div);
         }
       } else {
-        $(reference)
-          .after(div);
+        $(reference).after(div);
       }
     } else {
-      var quoteParent = $('#inlineQuote' + referencedPostNumber)
-        .parent();
-      var inlineQuoteId = $('#inlineQuote' + referencedPostNumber)
-        .attr('id');
+      var quoteParent = $('#inlineQuote' + referencedPostNumber).parent();
+      var inlineQuoteId = $('#inlineQuote' + referencedPostNumber).attr('id');
       quoteParent.attr('id', inlineQuoteId + "parentElem");
       if (backlink == 1) {
-        $("#backlinkInlineQuote" + referencedPostNumber)
-          .remove();
+        $("#backlinkInlineQuote" + referencedPostNumber).remove();
         console.log("#backlinkInlineQuote" + referencedPostNumber);
       } else {
-        $($(reference)
-          .next())
-          .remove();
+        $($(reference).next()).remove();
       }
     }
   } else {
     if (alreadyQuote == undefined) {
       $.get(reference.href, function (data) {
-        var loadedPost = $(data)
-          .find('#' + referencedPostNumber);
+        var loadedPost = $(data).find('#' + referencedPostNumber);
         if (loadedPost == null) {
-          loadedPost = $(data)
-            .find('#' + referencedPostNumber.replace('reply', 'parent'));
+          loadedPost = $(data).find('#' + referencedPostNumber.replace('reply', 'parent'));
         }
-        div = $($(data)
-          .find('#' + referencedPostNumber))
-          .clone(true, true);
-        $(div)
-          .attr("id", "inlineQuote" + referencedPostNumber);
-        $(div)
-          .find('div[id^=inlineQuote]')
-          .remove();
-        $(div)
-          .find('div[id^=backlinkInlineQuote]')
-          .remove();
-        if ($(div)
-          .find('a.thumbLink')
-          .children('img.expandedThumb')
-          .length) {
-          $(div)
-            .find('a.thumbLink')
-            .each(function (e) {
+        div = $($(data).find('#' + referencedPostNumber)).clone(true, true);
+        $(div).attr("id", "inlineQuote" + referencedPostNumber);
+        $(div).find('div[id^=inlineQuote]').remove();
+        $(div).find('div[id^=backlinkInlineQuote]').remove();
+        if ($(div).find('a.thumbLink').children('img.expandedThumb').length) {
+          $(div).find('a.thumbLink').each(function (e) {
             expandImage(this)
           });
         }
-        $(div)
-          .css("border", "1px solid grey");
-        $(div)
-          .css("display", "table");
-        $(reference)
-          .after(div);
+        $(div).css("border", "1px solid grey");
+        $(div).css("display", "table");
+        $(reference).after(div);
       });
     } else {
-      $($(reference)
-        .next())
-        .remove();
+      $($(reference).next()).remove();
     }
   }
 }
@@ -835,35 +659,23 @@ function threadUpdater() {
   req.send(null);
   modified = req.getResponseHeader("Last-Modified");
   var json = document.location + ".json";
-  if (document.getElementById("lastModified")
-    .innerHTML == modified) {
+  if (document.getElementById("lastModified").innerHTML == modified) {
     console.log("No new posts");
   } else {
-    document.getElementById("lastModified")
-      .innerHTML = modified;
+    document.getElementById("lastModified").innerHTML = modified;
     console.log("New post!");
     postsAdded++;
     $.getJSON(json, function (data) {
-      var lastPost = $('.thread')
-        .last()
-        .children()
-        .last('.reply')
-        .attr('id')
-        .replace("replyContainer", "");
+      var lastPost = $('.thread').last().children().last('.reply').attr('id').replace("replyContainer", "");
       var newPosts = [];
       $.each(data.posts, function (index, post) {
         if (post.no > lastPost) {
           newPosts.push(makeReply(post));
         }
       });
-      $(newPosts)
-        .find('.replyPostInfo')
-        .children('span')
-        .after("&nbsp;");
-      $('.thread')
-        .append(newPosts);
-      postsInTitle = $('.reply.newPost')
-        .length;
+      $(newPosts).find('.replyPostInfo').children('span').after("&nbsp;");
+      $('.thread').append(newPosts);
+      postsInTitle = $('.reply.newPost').length;
       titleFactory(1);
       doIt(1);
     });
@@ -882,8 +694,7 @@ function updateThread() {
     clearTimeout(updaterTimer);
     clearTimeout(updaterTimeLeft);
     isOn = 0;
-    document.getElementById("threadUpdaterButton")
-      .innerHTML = "Auto update";
+    document.getElementById("threadUpdaterButton").innerHTML = "Auto update";
   }
 }
 
@@ -891,15 +702,13 @@ function updaterCounter() {
   if (timeLeft == 0) {
     timeLeft = 30;
   }
-  document.getElementById("threadUpdaterButton")
-    .innerHTML = "-" + timeLeft;
+  document.getElementById("threadUpdaterButton").innerHTML = "-" + timeLeft;
   timeLeft--;
   updaterTimeLeft = setTimeout("updaterCounter()", 1000);
 }
 
 function makeReply(post) {
-  var board = document.getElementById('forJs')
-    .innerHTML;
+  var board = document.getElementById('forJs').innerHTML;
   var doubledash = document.createElement('div');
   doubledash.setAttribute("class", "doubledash");
   doubledash.innerHTML = "&gt;&gt;";
@@ -917,43 +726,35 @@ function makeReply(post) {
   delCheckbox.setAttribute('type', 'checkbox');
   delCheckbox.setAttribute('name', 'delete');
   delCheckbox.setAttribute('value', post.no);
-  $(replyPostInfo)
-    .append(delCheckbox);
+  $(replyPostInfo).append(delCheckbox);
   var replytitle = document.createElement('span');
   replytitle.setAttribute('class', 'replytitle');
   replytitle.innerHTML = post.sub;
-  $(replyPostInfo)
-    .append(replytitle);
+  $(replyPostInfo).append(replytitle);
   var postername = document.createElement('span');
   postername.setAttribute('class', 'postername');
   postername.innerHTML = post.name;
-  $(replyPostInfo)
-    .append(postername);
+  $(replyPostInfo).append(postername);
   var postertrip = document.createElement('span');
   postertrip.setAttribute('class', 'postertrip');
   postertrip.innerHTML = post.trip;
-  $(replyPostInfo)
-    .append(postertrip);
+  $(replyPostInfo).append(postertrip);
   var datespan = document.createElement('span');
   datespan.setAttribute('class', 'date');
   datespan.innerHTML = post.date;
-  $(replyPostInfo)
-    .append(datespan);
+  $(replyPostInfo).append(datespan);
   var idspan = document.createElement('span');
   idspan.setAttribute('class', 'id');
   idspan.innerHTML = post.id;
-  $(replyPostInfo)
-    .append(idspan);
+  $(replyPostInfo).append(idspan);
   var refLink = document.createElement('span');
   refLink.setAttribute('class', 'reflink');
   var refLinkInner = document.createElement('a');
   refLinkInner.setAttribute('class', 'refLinkInner');
   refLinkInner.setAttribute('href', 'javascript:insert(\'&gt;&gt;' + post.no + "\')");
   refLinkInner.innerHTML = "No." + post.no;
-  $(refLink)
-    .append(refLinkInner);
-  $(replyPostInfo)
-    .append(refLink);
+  $(refLink).append(refLinkInner);
+  $(replyPostInfo).append(refLink);
   var postMenuButton = document.createElement('a');
   postMenuButton.setAttribute("id", "postMenuButton" + post.no);
   postMenuButton.setAttribute("class", "postMenuButton");
@@ -994,20 +795,13 @@ function makeReply(post) {
   permaLink.setAttribute('target', '_blank');
   var blockquote = document.createElement('blockquote');
   blockquote.innerHTML = post.com;
-  $(replyContainer)
-    .append(doubledash);
-  $(reply)
-    .append(a);
-  $(replyPostInfo)
-    .append();
-  $(reply)
-    .append(replyPostInfo);
-  $(reply)
-    .append(postMenu);
-  $(reply)
-    .append(blockquote);
-  $(replyContainer)
-    .append(reply);
+  $(replyContainer).append(doubledash);
+  $(reply).append(a);
+  $(replyPostInfo).append();
+  $(reply).append(replyPostInfo);
+  $(reply).append(postMenu);
+  $(reply).append(blockquote);
+  $(replyContainer).append(reply);
   return replyContainer;
 }
 
@@ -1015,23 +809,15 @@ function hidePost(replyDivId) {
   var dengus = document.createElement("div");
   dengus.innerHTML = "Post Hidden";
   dengus.setAttribute("id", "postStub" + replyDivId.substring(5));
-  if ((document.getElementById(replyDivId)
-    .style.display == "table") || (document.getElementById(replyDivId)
-    .style.display == "")) {
-    document.getElementById(replyDivId)
-      .style.display = "none";
-    document.getElementById("replyContainer" + replyDivId.substring(5))
-      .appendChild(dengus);
-    document.getElementById(replyDivId)
-      .previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ + ]</a>";
+  if ((document.getElementById(replyDivId).style.display == "table") || (document.getElementById(replyDivId).style.display == "")) {
+    document.getElementById(replyDivId).style.display = "none";
+    document.getElementById("replyContainer" + replyDivId.substring(5)).appendChild(dengus);
+    document.getElementById(replyDivId).previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ + ]</a>";
     localStorage.setItem(replyDivId + "Hidden", "true");
   } else {
-    document.getElementById(replyDivId)
-      .style.display = "table";
-    document.getElementById(replyDivId)
-      .previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ - ]</a>";
-    document.getElementById("replyContainer" + replyDivId.substring(5))
-      .removeChild(document.getElementById("postStub" + replyDivId.substring(5)));
+    document.getElementById(replyDivId).style.display = "table";
+    document.getElementById(replyDivId).previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ - ]</a>";
+    document.getElementById("replyContainer" + replyDivId.substring(5)).removeChild(document.getElementById("postStub" + replyDivId.substring(5)));
     localStorage.removeItem(replyDivId + "Hidden");
   }
 }
@@ -1044,28 +830,23 @@ function hideThread(thread, parentPost, filesize) {
     hideThread(thread, parentPost, filesize);
   };
   if ((thread.style.display == "block") || (thread.style.display == "")) {
-    $(thread)
-      .after(dengus);
+    $(thread).after(dengus);
     thread.style.display = "none";
     localStorage.setItem("thread" + parentPost.id.substring(6) + "Hidden", "true");
   } else {
     thread.style.display = "block";
-    document.getElementById("postStub" + parentPost.id.substring(6))
-      .outerHTML = "";
+    document.getElementById("postStub" + parentPost.id.substring(6)).outerHTML = "";
     localStorage.removeItem("thread" + parentPost.id.substring(6) + "Hidden");
   }
 }
 
 function birthday(birthday, play) {
   if (birthday == 0) {
-    for (var i = 0; i < document.getElementsByClassName('hat')
-      .length; i++) {
+    for (var i = 0; i < document.getElementsByClassName('hat').length; i++) {
       document.getElementsByClassName('hat')[i].innerHTML = "<img src='http://www.glauchan.org/img/partyhat.gif' style='position:absolute; margin-top:-100px;'/>"
     }
-    document.getElementById("announcement")
-      .childNodes[1].innerHTML += "<br /><br /><a href='javascript:void(0)' onclick='birthday(1,1)'>Enable Party Hard mode</a>";
-    console.log(document.getElementById('announcement')
-      .firstChild.innerHTML);
+    document.getElementById("announcement").childNodes[1].innerHTML += "<br /><br /><a href='javascript:void(0)' onclick='birthday(1,1)'>Enable Party Hard mode</a>";
+    console.log(document.getElementById('announcement').firstChild.innerHTML);
   }
   if (birthday == 1) {
     if (play == 1) {
@@ -1097,8 +878,7 @@ function birthday(birthday, play) {
       ColorValue2 = "WHITE";
     }
     document.body.style.background = ColorValue2;
-    for (var i = 0; i < document.getElementsByClassName('reply')
-      .length; i++) {
+    for (var i = 0; i < document.getElementsByClassName('reply').length; i++) {
       document.getElementsByClassName('reply')[i].style.background = ColorValue;
     }
   }
@@ -1109,25 +889,20 @@ function partyHard() {
 }
 
 function deletePost(postNumber) {
-  var board = document.getElementById('forJs')
-    .innerHTML;
-  window.location = "http://" + window.location.hostname + "/" + board + "/wakaba.pl?task=delete&delete=" + postNumber + "&password=" + document.getElementById("delPass")
-    .value;
+  var board = document.getElementById('forJs').innerHTML;
+  window.location = "http://" + window.location.hostname + "/" + board + "/wakaba.pl?task=delete&delete=" + postNumber + "&password=" + document.getElementById("delPass").value;
 }
 
 function deleteImage(postNumber) {
-  var board = document.getElementById('forJs')
-    .innerHTML;
-  window.location = "http://" + window.location.hostname + "/" + board + "/wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass")
-    .value;
+  var board = document.getElementById('forJs').innerHTML;
+  window.location = "http://" + window.location.hostname + "/" + board + "/wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass").value;
 }
 
 function twitterPost(domain, post, parent) {
   if (parent == 0) {
     parent = post;
   }
-  var board = document.getElementById('forJs')
-    .innerHTML;
+  var board = document.getElementById('forJs').innerHTML;
   window.open("https://twitter.com/share?url=http://" + encodeURI(domain + "/" + board + "/res/" + parent) + "%23" + post);
 }
 
@@ -1135,7 +910,6 @@ function facebookPost(domain, post, parent) {
   if (parent == 0) {
     parent = post;
   }
-  var board = document.getElementById('forJs')
-    .innerHTML;
+  var board = document.getElementById('forJs').innerHTML;
   window.open("http://www.facebook.com/sharer.php?u=http://" + domain + "/" + board + "/res/" + parent + "%23" + post);
 }
