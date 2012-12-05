@@ -168,11 +168,11 @@ function preventDef(event) {
 function toggleNavMenu(link, mode) {
   if (mode == 0) {
     document.getElementById("overlay").style.display = "block";
-    link.outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>';
+    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>'
     loadSavedSettings();
   } else {
     document.getElementById("overlay").style.display = "none";
-    link.outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>';
+    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>'
   }
 }
 
@@ -194,7 +194,7 @@ $(document).mouseup(function (e) {
   var menus = $("div.postMenu");
   if (document.getElementById("overlay").style.display == "block") {
     if (container.has(e.target).length === 0) {
-      toggleNavMenu(document.getElementById('topNavRight').firstElementChild, 1);
+      toggleNavMenu(document.getElementsByClassName('topNavRight')[0].firstElementChild, 1);
     }
   }
   if (menus.has(e.target).length === 0) {
