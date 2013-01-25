@@ -1,4 +1,5 @@
 var openMenu;
+var hasPass = 0;
 
 function get_cookie(name) {
   with(document.cookie) {
@@ -28,6 +29,21 @@ function get_password(name) {
     pass += chars.substring(rnd, rnd + 1);
   }
   return (pass);
+}
+
+function hide_captcha() {
+  var pass = get_cookie("wakapass");
+  if (pass) {
+    console.log(pass);
+    var taargus = pass.split("##");
+    if (taargus[2] == 1) {
+      var logoutUrl = domain + "auth/logout/";
+      $($("#recaptchaContainer").children(".postField")[0]).html('<div style="padding: 5px;">You are using a ' + sitename + ' pass. [<a href="' + logoutUrl + '">Logout</a>]</div>');
+      hasPass = 1;
+    } else {
+      hasPass = 0;
+    }
+  }
 }
 
 function insert(text) {
@@ -154,6 +170,7 @@ window.onload = function (e) {
   }
   doIt();
   prettyPrint();
+  hide_captcha();
 }
 if (style_cookie) {
   var cookie = get_cookie(style_cookie);
@@ -203,7 +220,7 @@ $(document).mouseup(function (e) {
 });
 
 function reportPostPopup(post) {
-  reportWindow = window.open(boardPath + 'wakaba.pl?task=report&num=' + post, '', 'width=400px,height=210px,scrollbars=no');
+  reportWindow = window.open(boardPath + 'wakaba.pl?task=report&num=' + post, '', 'width=405px,height=215px,scrollbars=no');
 }
 
 function findPos(obj) {

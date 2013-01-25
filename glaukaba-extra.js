@@ -420,11 +420,16 @@ function quickReply(refLink, board) {
   var addons;
   var uploadField = $('#uploadField');
   if (document.getElementById("recaptchaContainer")) {
-    document.getElementById("recaptcha_reload_btn").href = "javascript:recaptchaRefresh();";
-    var recaptchaInsert = document.createElement('div');
-    recaptchaInsert.id = "recaptchaInsert";
-    recaptchaInsert.innerHTML = document.getElementById("recaptchaContainer").innerHTML;
-    hasCaptcha = 1;
+    if (hasPass == 0) {
+      document.getElementById("recaptcha_reload_btn").href = "javascript:recaptchaRefresh();";
+      var recaptchaInsert = document.createElement('div');
+      recaptchaInsert.id = "recaptchaInsert";
+      recaptchaInsert.innerHTML = document.getElementById("recaptchaContainer").innerHTML;
+      hasCaptcha = 1;
+    } else {
+      var recaptchaInsert = document.createElement('div');
+      recaptchaInsert.id = "recaptchaInsert";
+    }
   } else {
     var recaptchaInsert = document.createElement('div');
     recaptchaInsert.id = "recaptchaInsert";
