@@ -84,7 +84,8 @@ function updaterPrep() {
 }
 
 function hideThreadPrep() {
-  if (document.body.className) return;
+  if (document.body.className)
+    return;
   var threads = document.getElementsByClassName('thread');
   for (var i = 0; i < threads.length; i++) {
     (function (e) {
@@ -121,11 +122,13 @@ function hideReplyPrep() {
 }
 
 function postExpansionPrep() {
-  if (document.body.className) return;
+  if (document.body.className)
+    return;
   var links = document.getElementsByClassName("abbrev");
   for (var i = 0; i < links.length; i++) {
     var child = links[i].firstElementChild;
-    if (!child) continue;
+    if (!child)
+      continue;
     child.addEventListener("click", function (e) {
       expandPost(this);
       e.preventDefault();
@@ -134,7 +137,8 @@ function postExpansionPrep() {
 }
 
 function threadExpansionPrep() {
-  if (document.body.className) return;
+  if (document.body.className)
+    return;
   var links = document.getElementsByClassName("omittedposts");
   for (var i = 0; i < links.length; i++) {
     links[i].outerHTML = "<span class='omittedposts processed'><a style='text-decoration: none;' href='javascript:void(0)' onclick=expandThread('" + links[i].previousElementSibling.id + "',0)>+ " + links[i].innerHTML.replace("Reply", "here") + "</a></span>"
@@ -513,7 +517,8 @@ function expandImage(thumbLink) {
     }
   } else {
     var thumbFname = thumbLink.href.substring(thumbLink.href.lastIndexOf("src/") + 4, thumbLink.href.lastIndexOf("src/") + 17);
-    image.src = boardPath + "thumb/" + thumbFname + "s.jpg";
+    var thumbExt = thumbLink.href.substring(thumbLink.href.lastIndexOf("."));
+    image.src = boardPath + "thumb/" + thumbFname + "s" + thumbExt;
     image.removeAttribute("style");
     dicks = 1;
     if (image.className.indexOf("opThumb") == -1) {
@@ -833,20 +838,22 @@ function makeReply(post) {
   filterMenu.setAttribute('class', 'hasSubMenu');
   filterMenu.innerHTML = "<span class='postMenuItem'>Filter</span><div class='postMenu subMenu' style='display:none'><a class='postMenuItem' href='javascript:void(0)'>Not yet implemented</a></div>";
   $(postMenu).append(filterMenu);
-  var facebookButton = document.createElement('div');
-  facebookButton.setAttribute('onmouseover', 'closeSub(this)');
-  facebookButton.setAttribute('href', 'javascript:void(0)');
-  facebookButton.setAttribute('onclick', 'facebookPost(window.location.hostname,' + post.no + ',' + post.parent + ')');
-  facebookButton.setAttribute('class', 'postMenuItem');
-  facebookButton.innerHTML = "Post to Facebook";
-  $(postMenu).append(facebookButton);
-  var twitterButton = document.createElement('div');
-  twitterButton.setAttribute('onmouseover', 'closeSub(this)');
-  twitterButton.setAttribute('href', 'javascript:void(0)');
-  twitterButton.setAttribute('onclick', 'twitterPost(window.location.hostname,' + post.no + ',' + post.parent + ')');
-  twitterButton.setAttribute('class', 'postMenuItem');
-  twitterButton.innerHTML = "Post to Twitter";
-  $(postMenu).append(twitterButton);
+  if (social) {
+    var facebookButton = document.createElement('div');
+    facebookButton.setAttribute('onmouseover', 'closeSub(this)');
+    facebookButton.setAttribute('href', 'javascript:void(0)');
+    facebookButton.setAttribute('onclick', 'facebookPost(window.location.hostname,' + post.no + ',' + post.parent + ')');
+    facebookButton.setAttribute('class', 'postMenuItem');
+    facebookButton.innerHTML = "Post to Facebook";
+    $(postMenu).append(facebookButton);
+    var twitterButton = document.createElement('div');
+    twitterButton.setAttribute('onmouseover', 'closeSub(this)');
+    twitterButton.setAttribute('href', 'javascript:void(0)');
+    twitterButton.setAttribute('onclick', 'twitterPost(window.location.hostname,' + post.no + ',' + post.parent + ')');
+    twitterButton.setAttribute('class', 'postMenuItem');
+    twitterButton.innerHTML = "Post to Twitter";
+    $(postMenu).append(twitterButton);
+  }
   var permaLink = document.createElement('a');
   permaLink.setAttribute('href', boardPath + '/res/' + post.parent + '#' + post.no);
   permaLink.setAttribute('class', 'postMenuItem');
