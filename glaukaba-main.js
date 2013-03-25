@@ -159,11 +159,8 @@ window.onunload = function (e) {
 }
 window.onload = function (e) {
   var match;
-  if (match = /#i([0-9]+)/.exec(document.location.toString()))
-    if (!document.getElementById("field4").value)
-      insert(">>" + match[1]);
-  if (match = /#([0-9]+)/.exec(document.location.toString()))
-    highlight(match[1]);
+  if (match = /#i([0-9]+)/.exec(document.location.toString())) if (!document.getElementById("field4").value) insert(">>" + match[1]);
+  if (match = /#([0-9]+)/.exec(document.location.toString())) highlight(match[1]);
   if (window.location.href.indexOf("admin") == -1) {
     $("#boardList").children().each(function (option) {
       if ($(this).text() == "Select a board") {
@@ -196,17 +193,19 @@ function toggleNavMenu(link, mode) {
   }
 }
 
-function togglePostMenu(postMenuId, postMenuButtonId, mode) {
-  var menuState = document.getElementById(postMenuId).style.display;
-  if (mode == 0) {
-    document.getElementById(postMenuId).style.left = 0;
-    var dengus = findPos(document.getElementById(postMenuButtonId));
-    document.getElementById(postMenuId).style.left = dengus + "px";
-    document.getElementById(postMenuId).style.display = "block";
-    document.getElementById(postMenuButtonId).outerHTML = "<a href=\"javascript:void(0)\" onclick=\"togglePostMenu('" + postMenuId + "','" + postMenuButtonId + "',1);\" class=\"postMenuButton\" id=\"" + postMenuButtonId + "\">[<span></span>]</a>";
+function togglePostMenu(button) {
+  var menuName = $(button).attr('id');
+  menuName = menuName.replace("Button", "");
+  menuName = menuName.replace("Mobile", "");
+  var status = $("#" + menuName).css("display");
+  if (status == "none") {
+    $("#" + menuName).css("display", "inline");
+    if ($('.mobileParentPostInfo:visible').length > 0) {
+      console.log($('.mobileParentPostInfo:visible').length);
+      $("#" + menuName + "Mobile").css("display", "inline");
+    }
   } else {
-    document.getElementById(postMenuId).style.display = "none";
-    document.getElementById(postMenuButtonId).outerHTML = "<a href=\"javascript:void(0)\" onclick=\"togglePostMenu('" + postMenuId + "','" + postMenuButtonId + "',0);\" class=\"postMenuButton\" id=\"" + postMenuButtonId + "\">[<span></span>]</a>";
+    $("div.postMenu").css("display", "none");
   }
 }
 $(document).mouseup(function (e) {
@@ -218,7 +217,13 @@ $(document).mouseup(function (e) {
     }
   }
   if (menus.has(e.target).length === 0) {
-    menus.hide();
+    var openMenus = $("div.postMenu:visible");
+    if (openMenus.length > 0) {
+      var buttonID = $(openMenus).attr("id").replace("Menu", "MenuButton");
+      if ($("#" + buttonID).has(e.target).length === 0) {
+        openMenus.hide();
+      }
+    }
   }
 });
 
@@ -285,4 +290,13 @@ function deletePost(postNumber) {
 function deleteImage(postNumber) {
   var board = boardDir;
   window.location = boardPath + "wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass").value;
+}
+
+function togglePostForm() {
+  var postFormStatus = $("#postForm").css('display');
+  if (postFormStatus == "none") {
+    $("#postForm").css('display', 'block');
+  } else {
+    $("#postForm").css('display', 'none');
+  }
 }

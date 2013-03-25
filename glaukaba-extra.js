@@ -84,8 +84,7 @@ function updaterPrep() {
 }
 
 function hideThreadPrep() {
-  if (document.body.className)
-    return;
+  if (document.body.className) return;
   var threads = document.getElementsByClassName('thread');
   for (var i = 0; i < threads.length; i++) {
     (function (e) {
@@ -122,13 +121,11 @@ function hideReplyPrep() {
 }
 
 function postExpansionPrep() {
-  if (document.body.className)
-    return;
+  if (document.body.className) return;
   var links = document.getElementsByClassName("abbrev");
   for (var i = 0; i < links.length; i++) {
     var child = links[i].firstElementChild;
-    if (!child)
-      continue;
+    if (!child) continue;
     child.addEventListener("click", function (e) {
       expandPost(this);
       e.preventDefault();
@@ -137,8 +134,7 @@ function postExpansionPrep() {
 }
 
 function threadExpansionPrep() {
-  if (document.body.className)
-    return;
+  if (document.body.className) return;
   var links = document.getElementsByClassName("omittedposts");
   for (var i = 0; i < links.length; i++) {
     links[i].outerHTML = "<span class='omittedposts processed'><a style='text-decoration: none;' href='javascript:void(0)' onclick=expandThread('" + links[i].previousElementSibling.id + "',0)>+ " + links[i].innerHTML.replace("Reply", "here") + "</a></span>"
@@ -647,6 +643,8 @@ function inlineQuote(reference, url, mode, backlink) {
       div = $("#" + referencedPostNumber).clone(true, true);
       $(div).find('div[id^=inlineQuote]').remove();
       $(div).find('div[id^=backlinkInlineQuote]').remove();
+      $(div).find('.postMenuButton').remove();
+      $(div).find('.postMenu').remove();
       if ($(div).find('a.thumbLink').children('img.expandedThumb').length) {
         $(div).find('a.thumbLink').each(function (e) {
           expandImage(this)
@@ -694,6 +692,8 @@ function inlineQuote(reference, url, mode, backlink) {
         $(div).children('.replyPostInfo').children('span').after("&nbsp;");
         $(div).css("border", "1px solid #9E9E9E");
         $(div).css("display", "table");
+        $(div).find('.postMenuButton').remove();
+        $(div).find('.postMenu').remove();
         $(reference).after(div);
       });
     } else {
@@ -718,6 +718,7 @@ function threadUpdater() {
     postsAdded++;
     $.getJSON(json, function (data) {
       var lastPost = $('.thread').last().children().last('.reply').attr('id').replace("replyContainer", "");
+      lastPost = lastPost.replace("parent", "")
       var newPosts = [];
       $.each(data.posts, function (index, post) {
         if (post.no > lastPost) {
@@ -793,7 +794,9 @@ function makeReply(post) {
   var postertrip = document.createElement('span');
   postertrip.setAttribute('class', 'postertrip');
   postertrip.innerHTML = post.trip;
-  $(replyPostInfo).append(postertrip);
+  if (post.trip != "") {
+    $(replyPostInfo).append(postertrip);
+  }
   var datespan = document.createElement('span');
   datespan.setAttribute('class', 'date');
   datespan.innerHTML = post.now;
@@ -801,7 +804,10 @@ function makeReply(post) {
   var idspan = document.createElement('span');
   idspan.setAttribute('class', 'id');
   idspan.innerHTML = post.id;
-  $(replyPostInfo).append(idspan);
+  console.log(post.id);
+  if (post.id != null) {
+    $(replyPostInfo).append(idspan);
+  }
   var refLink = document.createElement('span');
   refLink.setAttribute('class', 'reflink');
   var refLinkInner = document.createElement('a');
