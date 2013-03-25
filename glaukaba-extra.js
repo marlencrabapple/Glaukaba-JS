@@ -40,7 +40,7 @@ function imgExpPrep() {
 }
 
 function qrPrep() {
-  var board = document.getElementById('forJs').innerHTML;
+  var board = boardDir;
   $("body").on("click", "a.refLinkInner", function (e) {
     quickReply(this, board);
     e.preventDefault();
@@ -369,7 +369,7 @@ function expandPost(link) {
 }
 
 function expandThread(parentDivId, mode) {
-  var board = document.getElementById('forJs').innerHTML;
+  var board = boardDir;
   var threadLink = window.location.hostname + "/" + board + "/res/" + parentDivId.replace("parent", "");
   if (mode == 0) {
     $.get(threadLink, function (data) {
@@ -517,8 +517,7 @@ function expandImage(thumbLink) {
     }
   } else {
     var thumbFname = thumbLink.href.substring(thumbLink.href.lastIndexOf("src/") + 4, thumbLink.href.lastIndexOf("src/") + 17);
-    var thumbExt = thumbLink.href.substring(thumbLink.href.lastIndexOf("."));
-    image.src = boardPath + "thumb/" + thumbFname + "s" + thumbExt;
+    image.src = boardPath + "thumb/" + thumbFname + "s.jpg";
     image.removeAttribute("style");
     dicks = 1;
     if (image.className.indexOf("opThumb") == -1) {
@@ -764,7 +763,7 @@ function updaterCounter() {
 }
 
 function makeReply(post) {
-  var board = document.getElementById('forJs').innerHTML;
+  var board = boardDir;
   var doubledash = document.createElement('div');
   doubledash.setAttribute("class", "doubledash");
   doubledash.innerHTML = "&gt;&gt;";
@@ -990,7 +989,7 @@ function twitterPost(domain, post, parent) {
   if (parent == 0) {
     parent = post;
   }
-  var board = document.getElementById('forJs').innerHTML;
+  var board = boardDir;
   window.open("https://twitter.com/share?url=http://" + encodeURI(domain + "/" + board + "/res/" + parent) + "%23" + post);
 }
 
@@ -998,6 +997,6 @@ function facebookPost(domain, post, parent) {
   if (parent == 0) {
     parent = post;
   }
-  var board = document.getElementById('forJs').innerHTML;
+  var board = boardDir;
   window.open("http://www.facebook.com/sharer.php?u=http://" + domain + "/" + board + "/res/" + parent + "%23" + post);
 }

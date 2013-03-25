@@ -159,8 +159,11 @@ window.onunload = function (e) {
 }
 window.onload = function (e) {
   var match;
-  if (match = /#i([0-9]+)/.exec(document.location.toString())) if (!document.getElementById("field4").value) insert(">>" + match[1]);
-  if (match = /#([0-9]+)/.exec(document.location.toString())) highlight(match[1]);
+  if (match = /#i([0-9]+)/.exec(document.location.toString()))
+    if (!document.getElementById("field4").value)
+      insert(">>" + match[1]);
+  if (match = /#([0-9]+)/.exec(document.location.toString()))
+    highlight(match[1]);
   if (window.location.href.indexOf("admin") == -1) {
     $("#boardList").children().each(function (option) {
       if ($(this).text() == "Select a board") {
@@ -275,11 +278,11 @@ function closeSub(menu) {
 }
 
 function deletePost(postNumber) {
-  var board = document.getElementById('forJs').innerHTML;
+  var board = boardDir;
   window.location = boardPath + "wakaba.pl?task=delete&delete=" + postNumber + "&password=" + document.getElementById("delPass").value;
 }
 
 function deleteImage(postNumber) {
-  var board = document.getElementById('forJs').innerHTML;
+  var board = boardDir;
   window.location = boardPath + "wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass").value;
 }
