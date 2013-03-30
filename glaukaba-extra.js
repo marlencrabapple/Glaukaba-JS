@@ -145,7 +145,7 @@ function threadExpansionPrep() {
 function backlinkPrep() {
   var postlinks = $('.postlink');
   $(postlinks).each(function (taargus) {
-    if ($(this).parent('.capcodeReplies').length == 0) {
+    if (($(this).parent('.capcodeReplies').length == 0) && ($(this).attr('href').indexOf("..") == -1)) {
       var postNum = $(this).text().replace(">>", "");
       var posts = $('#reply' + postNum + ", #parent" + postNum);
       var postLinkContainerNum = $(this).parents(".reply, .parent").last().attr('id').replace("reply", "");
