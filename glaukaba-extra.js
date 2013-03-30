@@ -11,6 +11,7 @@ var settings = ['qRep', 'inlineExpansion', 'threadUpdater', 'quotePreview', 'rep
 var hasCaptcha = 0;
 var postsInTitle = 0;
 var finalDivScrollPos;
+var ext = ".html";
 
 function setQrInputs() {
   document.getElementById("qrField1").value = get_cookie("name");
@@ -48,20 +49,20 @@ function qrPrep() {
 }
 
 function quotePreviewPrep() {
-  var varReferences = document.getElementsByClassName("postlink");
   $("body").on("mouseover", "a.postlink", function () {
     quotePreview(this, 0)
   });
   $("body").on("mouseout", "a.postlink", function () {
     quotePreview(this, 1)
   });
-  if (localStorage.getItem('inlineQuote') == 'true') {
-    $("a.postlink").removeAttr("onclick");
-    $("body").on("click", "a.postlink", function (e) {
-      inlineQuote(this, this.href, 0);
-      e.preventDefault();
-    });
-  }
+}
+
+function inlineQuotePrep() {
+  $("a.postlink").removeAttr("onclick");
+  $("body").on("click", "a.postlink", function (e) {
+    inlineQuote(this, this.href, 0);
+    e.preventDefault();
+  });
 }
 
 function updaterPrep() {
@@ -121,7 +122,7 @@ function hideReplyPrep() {
 }
 
 function postExpansionPrep() {
-  if (document.body.className) return;
+  if (document.body.className == "threadpage") return;
   var links = document.getElementsByClassName("abbrev");
   for (var i = 0; i < links.length; i++) {
     var child = links[i].firstElementChild;
@@ -134,76 +135,45 @@ function postExpansionPrep() {
 }
 
 function threadExpansionPrep() {
-  if (document.body.className) return;
+  if (document.body.className == "threadpage") return;
   var links = document.getElementsByClassName("omittedposts");
   for (var i = 0; i < links.length; i++) {
     links[i].outerHTML = "<span class='omittedposts processed'><a style='text-decoration: none;' href='javascript:void(0)' onclick=expandThread('" + links[i].previousElementSibling.id + "',0)>+ " + links[i].innerHTML.replace("Reply", "here") + "</a></span>"
   }
 }
 
-function replyBacklinkingPrep() {
-  var prerefs = document.getElementsByClassName("postlink");
-  var references = new Array();
-  $(prerefs).each(function (reference) {
-    if ($(prerefs[reference]).parent().attr("class") != "capcodeReplies") {
-      references.push(prerefs[reference]);
-    }
-  });
-  var postNumbers = document.getElementsByClassName("refLinkInner");
-  for (var i = 0; i < references.length; i++) {
-    for (var a = 0; a < postNumbers.length; a++) {
-      var referencedPost = references[i].innerHTML.replace("&gt;&gt;", "No.");
-      referencedPost = referencedPost.replace(" (OP)", "");
-      if (postNumbers[a].innerHTML.indexOf(referencedPost) != -1) {
-        var backlink = document.createElement("a");
-        var postReferenced = $(references[i]).parents().map(function () {
-          return this.id;
-        }).get().join(',');
-        if (postReferenced.indexOf("reply") != -1) {
-          var postReferencedId = "reply" + referencedPost.replace("No.", "");
-          postReferenced = postReferenced.split(',');
-          for (var x = 0; x < postReferenced.length; x++) {
-            if (postReferenced[x].indexOf("reply") != -1) {
-              postReferenced = postReferenced[x];
-            }
-          }
-          postReferenced = postReferenced.replace("reply", "");
-        } else {
-          var postReferencedId = "parent" + referencedPost.replace("No.", "");
-          postReferenced = postReferenced.split(',');
-          for (var x = 0; x < postReferenced.length; x++) {
-            if (postReferenced[x].indexOf("parent") != -1) {
-              postReferenced = postReferenced[x];
-            }
-          }
-          postReferenced = postReferenced.replace("parent", "");
-        }
-        if (document.getElementById("backlink" + postReferenced) == null) {
-          backlink.innerHTML = "&gt;&gt;" + postReferenced;
-          backlink.href = "javascript:void(0);"
-          backlink.id = "backlink" + postReferenced;
-          backlink.style.paddingRight = "3px";
-          $(backlink).bind('mouseover', function (e) {
-            quotePreview(this, 0);
-            e.preventDefault();
-          });
-          $(backlink).bind('mouseout', function (e) {
-            quotePreview(this, 1);
-            e.preventDefault();
-          });
-          if (localStorage.getItem('inlineQuote') == 'true') {
-            $(backlink).bind('click', function (a) {
-              inlineQuote(this, this.href, 0, 1);
-              a.preventDefault();
-            });
-          }
-          if (backlink.innerHTML.indexOf('inline') == -1) {
-            postNumbers[a].parentElement.parentElement.appendChild(backlink);
-          }
-        }
+function backlinkPrep() {
+  var postlinks = $('.postlink');
+  $(postlinks).each(function (taargus) {
+    if ($(this).parent('.capcodeReplies').length == 0) {
+      var postNum = $(this).text().replace(">>", "");
+      var posts = $('#reply' + postNum + ", #parent" + postNum);
+      var postLinkContainerNum = $(this).parents(".reply, .parent").last().attr('id').replace("reply", "");
+      postLinkContainerNum.replace("parent", "");
+      var backlink = document.createElement("a");
+      backlink.innerHTML = "&gt;&gt;" + postLinkContainerNum;
+      backlink.href = "javascript:void(0);"
+      backlink.id = "backlink" + postLinkContainerNum;
+      backlink.style.paddingRight = "3px";
+      if (localStorage.getItem('quotePreview') == 'true') {
+        $(backlink).bind("mouseover", "a.postlink", function () {
+          quotePreview(this, 0)
+        });
+        $(backlink).bind("mouseout", "a.postlink", function () {
+          quotePreview(this, 1)
+        });
+      }
+      if (localStorage.getItem('inlineQuote') == 'true') {
+        $(backlink).bind('click', function (a) {
+          inlineQuote(this, this.href, 0, 1);
+          a.preventDefault();
+        });
+      }
+      if ($(posts).children("#backlink" + postLinkContainerNum).length == 0) {
+        $(posts).children('.postMenu').after(backlink);
       }
     }
-  }
+  });
 }
 
 function highlightPosts(identifier) {
@@ -305,49 +275,55 @@ $(document).scroll(function () {
 });
 
 function doIt(again) {
-  if (!again) {
-    if (localStorage.getItem('qRep') == 'true') {
-      qrPrep();
+  if (noExt == 1) {
+    ext = "";
+  }
+  if ($('body').attr('class')) {
+    if (!again) {
+      if (localStorage.getItem('qRep') == 'true') {
+        qrPrep();
+      }
+      if (localStorage.getItem('quotePreview') == 'true') {
+        quotePreviewPrep();
+      }
+      if (localStorage.getItem('inlineExpansion') == 'true') {
+        imgExpPrep();
+      }
+      if (localStorage.getItem('expandFilename') == 'true') {
+        expandFilename();
+      }
+      if (localStorage.getItem('fixedNav') == 'true') {
+        fixedNav();
+      }
+      highlightPosts();
     }
-    if (localStorage.getItem('quotePreview') == 'true') {
-      quotePreviewPrep();
+    if (localStorage.getItem('replyHiding') == 'true') {
+      hideReplyPrep();
     }
-    if (localStorage.getItem('inlineExpansion') == 'true') {
-      imgExpPrep();
+    if (localStorage.getItem('threadUpdater') == 'true') {
+      updaterPrep();
     }
-    if (localStorage.getItem('expandFilename') == 'true') {
-      expandFilename();
+    if (localStorage.getItem('threadHiding') == 'true') {
+      hideThreadPrep();
     }
-    if (localStorage.getItem('fixedNav') == 'true') {
-      fixedNav();
+    if (localStorage.getItem('anonymize') == 'true') {
+      anonymize();
     }
-    highlightPosts();
+    if (localStorage.getItem('expandPosts') == 'true') {
+      postExpansionPrep();
+    }
+    if (localStorage.getItem('expandThreads') == 'true') {
+      threadExpansionPrep();
+    }
+    if (localStorage.getItem('replyBacklinking') == 'true') {
+      backlinkPrep();
+    }
+    if (localStorage.getItem('inlineQuote') == 'true') {
+      $("a.postlink").removeAttr("onclick");
+      inlineQuotePrep();
+    }
+    prettyPrint();
   }
-  if (localStorage.getItem('replyHiding') == 'true') {
-    hideReplyPrep();
-  }
-  if (localStorage.getItem('threadUpdater') == 'true') {
-    updaterPrep();
-  }
-  if (localStorage.getItem('threadHiding') == 'true') {
-    hideThreadPrep();
-  }
-  if (localStorage.getItem('anonymize') == 'true') {
-    anonymize();
-  }
-  if (localStorage.getItem('expandPosts') == 'true') {
-    postExpansionPrep();
-  }
-  if (localStorage.getItem('expandThreads') == 'true') {
-    threadExpansionPrep();
-  }
-  if (localStorage.getItem('replyBacklinking') == 'true') {
-    replyBacklinkingPrep();
-  }
-  if (localStorage.getItem('inlineQuote') == 'true') {
-    $("a.postlink").removeAttr("onclick");
-  }
-  prettyPrint();
 }
 
 function expandPost(link) {
@@ -366,7 +342,9 @@ function expandPost(link) {
 
 function expandThread(parentDivId, mode) {
   var board = boardDir;
-  var threadLink = window.location.hostname + "/" + board + "/res/" + parentDivId.replace("parent", "");
+  var threadLink = boardPath + "res/" + parentDivId.replace("parent", "") + ext;
+  console.log(board);
+  console.log(window.location.hostname);
   if (mode == 0) {
     $.get(threadLink, function (data) {
       var loadedThread = $(data).find(".replyContainer");
@@ -704,12 +682,10 @@ function inlineQuote(reference, url, mode, backlink) {
 
 function threadUpdater() {
   req = new XMLHttpRequest();
-  var json = window.location.href.replace(/#.*/i, "");
-  json = json.replace(/.html/i, "");
+  var json = boardPath + "res/" + $(".parentPost").attr("id").replace("parent", "") + ".json";
   req.open('HEAD', json, false);
   req.send(null);
   modified = req.getResponseHeader("Last-Modified");
-  json = json + ".json";
   if (document.getElementById("lastModified").innerHTML == modified) {
     console.log("No new posts");
   } else {
@@ -804,7 +780,6 @@ function makeReply(post) {
   var idspan = document.createElement('span');
   idspan.setAttribute('class', 'id');
   idspan.innerHTML = post.id;
-  console.log(post.id);
   if (post.id != null) {
     $(replyPostInfo).append(idspan);
   }
@@ -860,7 +835,7 @@ function makeReply(post) {
     $(postMenu).append(twitterButton);
   }
   var permaLink = document.createElement('a');
-  permaLink.setAttribute('href', boardPath + '/res/' + post.parent + '#' + post.no);
+  permaLink.setAttribute('href', boardPath + '/res/' + post.parent + ext + '#' + post.no);
   permaLink.setAttribute('class', 'postMenuItem');
   permaLink.setAttribute('target', '_blank');
   permaLink.innerHTML = "Permalink";
@@ -996,7 +971,7 @@ function twitterPost(domain, post, parent) {
     parent = post;
   }
   var board = boardDir;
-  window.open("https://twitter.com/share?url=http://" + encodeURI(domain + "/" + board + "/res/" + parent) + "%23" + post);
+  window.open("https://twitter.com/share?url=http://" + encodeURI(domain + "/" + board + "/res/" + parent + ext) + "%23" + post);
 }
 
 function facebookPost(domain, post, parent) {
@@ -1004,5 +979,5 @@ function facebookPost(domain, post, parent) {
     parent = post;
   }
   var board = boardDir;
-  window.open("http://www.facebook.com/sharer.php?u=http://" + domain + "/" + board + "/res/" + parent + "%23" + post);
+  window.open("http://www.facebook.com/sharer.php?u=http://" + domain + "/" + board + "/res/" + parent + ext + "%23" + post);
 }

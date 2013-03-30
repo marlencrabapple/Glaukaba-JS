@@ -198,14 +198,23 @@ function togglePostMenu(button) {
   menuName = menuName.replace("Button", "");
   menuName = menuName.replace("Mobile", "");
   var status = $("#" + menuName).css("display");
+  if ($(button).attr('id').indexOf("Mobile") != -1) {
+    var status = $("#" + menuName + "Mobile").css("display");
+  }
   if (status == "none") {
-    $("#" + menuName).css("display", "inline");
     if ($('.mobileParentPostInfo:visible').length > 0) {
-      console.log($('.mobileParentPostInfo:visible').length);
-      $("#" + menuName + "Mobile").css("display", "inline");
+      $("#" + menuName + "Mobile").css("display", "block");
+      if ($(button).attr('id').indexOf("Mobile") == -1) {
+        $("#" + menuName).css("display", "inline");
+      }
+    } else {
+      document.getElementById(menuName).style.left = 0;
+      var dengus = findPos(document.getElementById($(button).attr('id')));
+      document.getElementById(menuName).style.left = dengus + "px";
+      $("#" + menuName).css("display", "block");
     }
   } else {
-    $("div.postMenu").css("display", "none");
+    $(".postMenu").css("display", "none");
   }
 }
 $(document).mouseup(function (e) {
