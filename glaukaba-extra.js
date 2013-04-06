@@ -85,21 +85,18 @@ function updaterPrep() {
 }
 
 function hideThreadPrep() {
-  if (document.body.className) return;
+  if (document.body.className != "indexpage") return;
   var threads = document.getElementsByClassName('thread');
   for (var i = 0; i < threads.length; i++) {
     (function (e) {
       var parentPost = threads[e].firstElementChild;
       var filesize = $(parentPost).children('.filesize')[0];
-      if (!filesize) {
-        var filesize = $(parentPost).children('.parentPostInfo')[0];
-      }
       var hideButton = document.createElement("a");
       hideButton.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ - ]</a> ";
       hideButton.addEventListener("click", function () {
         hideThread(threads[e], parentPost, hideButton)
       });
-      $(filesize).before(hideButton);
+      $(parentPost).children('.fileinfo').children('span').before(hideButton);
       if (localStorage.getItem("thread" + parentPost.id.substring(6) + "Hidden") == 'true') {
         hideThread(threads[e], parentPost, filesize);
       }
@@ -145,7 +142,7 @@ function threadExpansionPrep() {
 function backlinkPrep() {
   var postlinks = $('.postlink');
   $(postlinks).each(function (taargus) {
-    if (($(this).parent('.capcodeReplies').length == 0) && ($(this).attr('href').indexOf("..") == -1)) {
+    if (($(this).parent('.capcodeReplies').length == 0) && ($(this).attr('href').indexOf("#") != -1)) {
       var postNum = $(this).text().replace(">>", "");
       var posts = $('#reply' + postNum + ", #parent" + postNum);
       var postLinkContainerNum = $(this).parents(".reply, .parent").last().attr('id').replace("reply", "");
@@ -182,13 +179,11 @@ function highlightPosts(identifier) {
     if (identifier.className == "postername") {
       if (identifier.firstElementChild != null) {
         if (identifier.firstElementChild.className == "adminName") {
-          console.log($(identifier).text());
           var thread = $(identifier).parentsUntil("div.thread").parent()[0];
           $(thread).children("div.replyContainer").children('div.reply:contains("## Admin")').attr('class', 'reply highlight');
         }
       } else if (identifier.nextElementSibling.className == "postertrip") {
         identifier = identifier.nextElementSibling;
-        console.log($(identifier).text());
         var thread = $(identifier).parentsUntil("div.thread").parent()[0];
         $(thread).children("div.replyContainer").children('div.reply:contains("' + $(identifier).text() + '")').attr('class', 'reply highlight');
       } else {
@@ -197,17 +192,14 @@ function highlightPosts(identifier) {
     } else if (identifier.className == "postertrip") {
       if (identifier.firstElementChild != null) {
         if (identifier.firstElementChild.className == "adminTrip") {
-          console.log($(identifier).text());
           var thread = $(identifier).parentsUntil("div.thread").parent()[0];
           $(thread).children("div.replyContainer").children('div.reply:contains("## Admin")').attr('class', 'reply highlight');
         }
       } else {
-        console.log($(identifier).text());
         var thread = $(identifier).parentsUntil("div.thread").parent()[0];
         $(thread).children("div.replyContainer").children('div.reply:contains("' + $(identifier).text() + '")').attr('class', 'reply highlight');
       }
-    } else if (identifier.className == "id") {
-      console.log($(identifier).text());
+    } else if (identifier.className == "posteridnum") {
       var thread = $(identifier).parentsUntil("div.thread").parent()[0];
       $(thread).children("div.replyContainer").children('div.reply:contains(' + $(identifier).text() + ')').attr('class', 'reply highlight');
     }
@@ -218,7 +210,7 @@ function highlightPosts(identifier) {
     $("body").on("click", "span.postertrip", function () {
       highlightPosts(this)
     });
-    $("body").on("click", "span.id", function () {
+    $("body").on("click", "span.posteridnum", function () {
       highlightPosts(this)
     });
   }
@@ -773,16 +765,16 @@ function makeReply(post) {
   if (post.trip != "") {
     $(replyPostInfo).append(postertrip);
   }
+  var idspan = document.createElement('span');
+  idspan.setAttribute('class', 'posterid');
+  idspan.innerHTML = "(ID: <span class=\"posteridnum\">" + post.id + "</span>)";
+  if (post.id != null) {
+    $(replyPostInfo).append(idspan);
+  }
   var datespan = document.createElement('span');
   datespan.setAttribute('class', 'date');
   datespan.innerHTML = post.now;
   $(replyPostInfo).append(datespan);
-  var idspan = document.createElement('span');
-  idspan.setAttribute('class', 'id');
-  idspan.innerHTML = post.id;
-  if (post.id != null) {
-    $(replyPostInfo).append(idspan);
-  }
   var refLink = document.createElement('span');
   refLink.setAttribute('class', 'reflink');
   var refLinkInner = document.createElement('a');
@@ -873,9 +865,7 @@ function makeReply(post) {
   $(reply).append(replyPostInfo);
   $(reply).append(postMenu);
   if (post.filename) {
-    $(reply).append("<br />");
-    $(reply).append(fileSize);
-    $(reply).append("<br />");
+    $(reply).append("<div class=\"fileinfo\">" + fileSize.outerHTML + "</div>");
     $(reply).append(thumbLink);
   }
   $(reply).append(blockquote);
