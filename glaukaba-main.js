@@ -37,7 +37,10 @@ function hide_captcha() {
     console.log(pass);
     var taargus = pass.split("##");
     if (taargus[2] == 1) {
-      var logoutUrl = domain + "auth/logout/";
+      var logoutUrl = boardPath + "wakaba.pl?task=logout&type=pass";
+      if (noExt == 1) {
+        logoutUrl = domain + "auth/logout";
+      }
       $($("#recaptchaContainer").children(".postField")[0]).html('<div style="padding: 5px;">You are using a ' + sitename + ' pass. [<a href="' + logoutUrl + '">Logout</a>]</div>');
       hasPass = 1;
     } else {
@@ -167,6 +170,15 @@ window.onload = function (e) {
         $("#boardList").prop("selectedIndex", $(this).prop("index"));
       }
     });
+  }
+  if (document.getElementById("styleSelector")) {
+    var styles = new Array();
+    styles = document.getElementById("styleSelector").options;
+    for (var i = 0; i < styles.length; i++) {
+      if (get_active_stylesheet() == styles[i].value) {
+        document.getElementById("styleSelector").selectedIndex = styles[i].index;
+      }
+    }
   }
   doIt();
   prettyPrint();
