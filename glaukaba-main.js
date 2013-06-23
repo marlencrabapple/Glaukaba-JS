@@ -1,323 +1,410 @@
+// These are the important functions. Everything else will be enabled seperately
 var openMenu;
 var hasPass = 0;
 
-function get_cookie(name) {
-  with(document.cookie) {
-    var regexp = new RegExp("(^|;\\s+)" + name + "=(.*?)(;|$)");
-    var hit = regexp.exec(document.cookie);
-    if (hit && hit.length > 2) return unescape(hit[2]);
-    else return '';
-  }
+function get_cookie(name)
+{
+	with(document.cookie)
+	{
+		var regexp=new RegExp("(^|;\\s+)"+name+"=(.*?)(;|$)");
+		var hit=regexp.exec(document.cookie);
+		if(hit&&hit.length>2) return unescape(hit[2]);
+		else return '';
+	}
 };
 
-function set_cookie(name, value, days) {
-  if (days) {
-    var date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    var expires = "; expires=" + date.toGMTString();
-  } else expires = "";
-  document.cookie = name + "=" + value + expires + "; path=/";
+function set_cookie(name,value,days)
+{
+	if(days)
+	{
+		var date=new Date();
+		date.setTime(date.getTime()+(days*24*60*60*1000));
+		var expires="; expires="+date.toGMTString();
+	}
+	else expires="";
+	document.cookie=name+"="+value+expires+"; path=/";
 }
 
-function get_password(name) {
-  var pass = get_cookie(name);
-  if (pass) return pass;
-  var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  var pass = '';
-  for (var i = 0; i < 8; i++) {
-    var rnd = Math.floor(Math.random() * chars.length);
-    pass += chars.substring(rnd, rnd + 1);
-  }
-  return (pass);
+function get_password(name)
+{
+	var pass=get_cookie(name);
+	if(pass) return pass;
+
+	var chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	var pass='';
+
+	for(var i=0;i<8;i++)
+	{
+		var rnd=Math.floor(Math.random()*chars.length);
+		pass+=chars.substring(rnd,rnd+1);
+	}
+
+	return(pass);
 }
 
-function hide_captcha() {
-  var pass = get_cookie("wakapass");
-  if (pass) {
-    console.log(pass);
-    var taargus = pass.split("##");
-    if (taargus[2] == 1) {
-      var logoutUrl = boardPath + "wakaba.pl?task=logout&type=pass";
-      if (noExt == 1) {
-        logoutUrl = domain + "auth/logout";
-      }
-      $($("#recaptchaContainer").children(".postField")[0]).html('<div style="padding: 5px;">You are using a ' + sitename + ' pass. [<a href="' + logoutUrl + '">Logout</a>]</div>');
-      hasPass = 1;
-    } else {
-      hasPass = 0;
-    }
-  }
+function hide_captcha(){
+	var pass=get_cookie("wakapass");
+	if(pass){
+		console.log(pass);
+		var taargus = pass.split("##");
+		if(taargus[2]==1){
+			var logoutUrl=boardPath+"wakaba.pl?task=logout&type=pass";
+			
+			if(noExt==1){
+				logoutUrl=domain+"auth/logout";
+			}
+			
+			$($("#recaptchaContainer").children(".postField")[0]).html('<div style="padding: 5px;">You are using a '+sitename+' pass. [<a href="'+logoutUrl+'">Logout</a>]</div>');
+			hasPass=1;
+		}
+		else{
+			hasPass=0;
+		}
+	}
 }
 
-function insert(text) {
-  var textarea = document.getElementById("field4");
-  if (textarea) {
-    if (textarea.createTextRange && textarea.caretPos) {
-      var caretPos = textarea.caretPos;
-      caretPos.text = caretPos.text.charAt(caretPos.text.length - 1) == " " ? text + " " : text;
-    } else if (textarea.setSelectionRange) {
-      var start = textarea.selectionStart;
-      var end = textarea.selectionEnd;
-      textarea.value = textarea.value.substr(0, start) + text + textarea.value.substr(end);
-      textarea.setSelectionRange(start + text.length, start + text.length);
-    } else {
-      textarea.value += text + " ";
-    }
-    textarea.focus();
-  }
+function insert(text)
+{
+	var textarea=document.getElementById("field4");
+	
+	if(textarea)
+	{
+		if(textarea.createTextRange && textarea.caretPos) // IE
+		{
+			var caretPos=textarea.caretPos;
+			caretPos.text=caretPos.text.charAt(caretPos.text.length-1)==" "?text+" ":text;
+		}
+		else if(textarea.setSelectionRange) // Firefox
+		{
+			var start=textarea.selectionStart;
+			var end=textarea.selectionEnd;
+			textarea.value=textarea.value.substr(0,start)+text+textarea.value.substr(end);
+			textarea.setSelectionRange(start+text.length,start+text.length);
+		}
+		else
+		{
+			textarea.value+=text+" ";
+		}
+		
+		textarea.focus();
+	}
 }
 
-function highlight(post) {
-  var cells = document.getElementsByTagName("div");
-  for (var i = 0; i < cells.length; i++) if (cells[i].className == "reply highlight") cells[i].className = "reply";
-  var reply = document.getElementById("reply" + post);
-  if (reply) {
-    reply.className = "reply highlight";
-    var match = /^([^#]*)/.exec(document.location.toString());
-    document.location = match[1] + "#" + post;
-    return false;
-  }
-  return true;
+function highlight(post)
+{
+	// needs logic for detecting OP
+	var cells=document.getElementsByTagName("div");
+	for(var i=0;i<cells.length;i++) if(cells[i].className=="reply highlight") cells[i].className="reply";
+
+	var reply = document.getElementById("reply"+post);
+	if(reply)
+	{
+		reply.className="reply highlight";
+		var match=/^([^#]*)/.exec(document.location.toString());
+		document.location=match[1]+"#"+post;
+		return false;
+	}
+
+	return true;
 }
 
-function set_stylesheet(styletitle, norefresh) {
-  set_cookie("wakabastyle", styletitle, 365);
-  var links = document.getElementsByTagName("link");
-  var found = false;
-  for (var i = 0; i < links.length; i++) {
-    var rel = links[i].getAttribute("rel");
-    var title = links[i].getAttribute("title");
-    if (rel.indexOf("style") != -1 && title) {
-      links[i].disabled = true;
-      if (styletitle == title) {
-        links[i].disabled = false;
-        found = true;
-      }
-    }
-  }
-  if (!found) set_preferred_stylesheet();
+function set_stylesheet(styletitle,norefresh)
+{
+	set_cookie("wakabastyle",styletitle,365);
+
+	var links=document.getElementsByTagName("link");
+	var found=false;
+	for(var i=0;i<links.length;i++)
+	{
+		var rel=links[i].getAttribute("rel");
+		var title=links[i].getAttribute("title");
+		if(rel.indexOf("style")!=-1&&title)
+		{
+			links[i].disabled=true; // IE needs this to work. IE needs to die.
+			if(styletitle==title) { links[i].disabled=false; found=true; }
+		}
+	}
+	if(!found) set_preferred_stylesheet();
 }
 
-function set_preferred_stylesheet() {
-  var links = document.getElementsByTagName("link");
-  for (var i = 0; i < links.length; i++) {
-    var rel = links[i].getAttribute("rel");
-    var title = links[i].getAttribute("title");
-    if (rel.indexOf("style") != -1 && title) links[i].disabled = (rel.indexOf("alt") != -1);
-  }
+function set_preferred_stylesheet()
+{
+	var links=document.getElementsByTagName("link");
+	for(var i=0;i<links.length;i++)
+	{
+		var rel=links[i].getAttribute("rel");
+		var title=links[i].getAttribute("title");
+		if(rel.indexOf("style")!=-1&&title) links[i].disabled=(rel.indexOf("alt")!=-1);
+	}
 }
 
-function get_active_stylesheet() {
-  var links = document.getElementsByTagName("link");
-  for (var i = 0; i < links.length; i++) {
-    var rel = links[i].getAttribute("rel");
-    var title = links[i].getAttribute("title");
-    if (rel.indexOf("style") != -1 && title && !links[i].disabled) return title;
-  }
-  return null;
+function get_active_stylesheet()
+{
+	var links=document.getElementsByTagName("link");
+	for(var i=0;i<links.length;i++)
+	{
+		var rel=links[i].getAttribute("rel");
+		var title=links[i].getAttribute("title");
+		if(rel.indexOf("style")!=-1&&title&&!links[i].disabled) return title;
+	}
+	return null;
 }
 
-function get_preferred_stylesheet() {
-  var links = document.getElementsByTagName("link");
-  for (var i = 0; i < links.length; i++) {
-    var rel = links[i].getAttribute("rel");
-    var title = links[i].getAttribute("title");
-    if (rel.indexOf("style") != -1 && rel.indexOf("alt") == -1 && title) return title;
-  }
-  return null;
+function get_preferred_stylesheet()
+{
+	var links=document.getElementsByTagName("link");
+	for(var i=0;i<links.length;i++)
+	{
+		var rel=links[i].getAttribute("rel");
+		var title=links[i].getAttribute("title");
+		if(rel.indexOf("style")!=-1&&rel.indexOf("alt")==-1&&title) return title;
+	}
+	return null;
 }
 
-function set_inputs(id) {
-  with(document.getElementById(id)) {
-    if (!field1.value) field1.value = get_cookie("name");
-    if (!field2.value) field2.value = get_cookie("email");
-    if (!password.value) password.value = get_password("password");
-  }
+function set_inputs(id) { with(document.getElementById(id)) {if(!field1.value) field1.value=get_cookie("name"); if(!field2.value) field2.value=get_cookie("email"); if(!password.value) password.value=get_password("password"); } }
+function set_delpass(id) { with(document.getElementById(id)) password.value=get_cookie("password"); }
+
+function setPostInputs(){
+	document.getElementById("field1").value=get_cookie("name");
+	document.getElementById("field2").value=get_cookie("email");
+	document.getElementById("password").value=get_password("password");
 }
 
-function set_delpass(id) {
-  with(document.getElementById(id)) password.value = get_cookie("password");
+function setDelPass(){
+	document.getElementById("delPass").value=get_password("password");
 }
 
-function setPostInputs() {
-  document.getElementById("field1").value = get_cookie("name");
-  document.getElementById("field2").value = get_cookie("email");
-  document.getElementById("password").value = get_password("password");
+function do_ban(el)
+{
+	var reason=prompt("Give a reason for this ban:");
+	if(reason) document.location=el.href+"&comment="+encodeURIComponent(reason);
+	return false;
 }
 
-function setDelPass() {
-  document.getElementById("delPass").value = get_password("password");
+window.onunload=function(e)
+{
+	if(style_cookie)
+	{
+		var title=get_active_stylesheet();
+		set_cookie(style_cookie,title,365);
+	}
 }
 
-function do_ban(el) {
-  var reason = prompt("Give a reason for this ban:");
-  if (reason) document.location = el.href + "&comment=" + encodeURIComponent(reason);
-  return false;
+window.onload=function(e)
+{
+	var match;
+
+	if(match=/#i([0-9]+)/.exec(document.location.toString()))
+	if(!document.getElementById("field4").value)
+	insert(">>"+match[1]);
+
+	if(match=/#([0-9]+)/.exec(document.location.toString()))
+	highlight(match[1]);
+	
+	if(window.location.href.indexOf("admin")==-1){
+		$("#boardList").children().each(function(option){
+			if($(this).text()=="Select a board"){
+				$("#boardList").prop("selectedIndex",$(this).prop("index"));
+			}
+		});
+	}
+	
+	if(document.getElementById("styleSelector")){
+		var styles = new Array();
+		styles = document.getElementById("styleSelector").options;
+		
+		for (var i=0;i<styles.length;i++){
+			//console.log(styles[i].value);
+			if(get_active_stylesheet()==styles[i].value){
+				document.getElementById("styleSelector").selectedIndex = styles[i].index;
+			}
+		}
+	}
+	
+	//styles.forEach(function(){
+		//if(get_active_stylesheet()==this.namedItem){
+			//document.getElementById("styleSelector").selectedIndex = this.index;
+		//}
+	//	console.log(this.index);
+	//});
+	
+	doIt();
+	prettyPrint();
+	hide_captcha();
 }
-window.onunload = function (e) {
-  if (style_cookie) {
-    var title = get_active_stylesheet();
-    set_cookie(style_cookie, title, 365);
-  }
-}
-window.onload = function (e) {
-  var match;
-  if (match = /#i([0-9]+)/.exec(document.location.toString())) if (!document.getElementById("field4").value) insert(">>" + match[1]);
-  if (match = /#([0-9]+)/.exec(document.location.toString())) highlight(match[1]);
-  if (window.location.href.indexOf("admin") == -1) {
-    $("#boardList").children().each(function (option) {
-      if ($(this).text() == "Select a board") {
-        $("#boardList").prop("selectedIndex", $(this).prop("index"));
-      }
-    });
-  }
-  if (document.getElementById("styleSelector")) {
-    var styles = new Array();
-    styles = document.getElementById("styleSelector").options;
-    for (var i = 0; i < styles.length; i++) {
-      if (get_active_stylesheet() == styles[i].value) {
-        document.getElementById("styleSelector").selectedIndex = styles[i].index;
-      }
-    }
-  }
-  doIt();
-  prettyPrint();
-  hide_captcha();
-}
-if (style_cookie) {
-  var cookie = get_cookie(style_cookie);
-  var title = cookie ? cookie : get_preferred_stylesheet();
-  set_stylesheet(title);
+
+if(style_cookie)
+{
+	var cookie=get_cookie(style_cookie);
+	var title=cookie?cookie:get_preferred_stylesheet();
+	set_stylesheet(title);
 }
 
 function preventDef(event) {
-  event.preventDefault();
+	event.preventDefault();
 }
 
-function toggleNavMenu(link, mode) {
-  if (mode == 0) {
-    document.getElementById("overlay").style.display = "block";
-    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>'
-    loadSavedSettings();
-  } else {
-    document.getElementById("overlay").style.display = "none";
-    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>'
-  }
+function toggleNavMenu(link,mode){
+	
+	//console.log(link);
+	if(mode==0){
+		document.getElementById("overlay").style.display="block";
+		//link.outerHTML='<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>';
+		$('.topNavRight').children('a').outerHTML='<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>'
+		loadSavedSettings();
+	}
+	else{
+		document.getElementById("overlay").style.display="none";
+		//link.outerHTML='<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>';
+		$('.topNavRight').children('a').outerHTML='<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>'
+	}
 }
 
-function togglePostMenu(button) {
-  var menuName = $(button).attr('id');
-  menuName = menuName.replace("Button", "");
-  menuName = menuName.replace("Mobile", "");
-  var status = $("#" + menuName).css("display");
-  if ($(button).attr('id').indexOf("Mobile") != -1) {
-    var status = $("#" + menuName + "Mobile").css("display");
-  }
-  if (status == "none") {
-    if ($('.mobileParentPostInfo:visible').length > 0) {
-      $("#" + menuName + "Mobile").css("display", "block");
-      if ($(button).attr('id').indexOf("Mobile") == -1) {
-        $("#" + menuName).css("display", "inline");
-      }
-    } else {
-      document.getElementById(menuName).style.left = 0;
-      var dengus = findPos(document.getElementById($(button).attr('id')));
-      document.getElementById(menuName).style.left = dengus + "px";
-      $("#" + menuName).css("display", "block");
-    }
-  } else {
-    $(".postMenu").css("display", "none");
-  }
+function togglePostMenu(button){
+	var menuName = $(button).attr('id');
+	menuName = menuName.replace("Button","");
+	menuName = menuName.replace("Mobile","");
+	var status = $("#"+menuName).css("display");
+	
+	if($(button).attr('id').indexOf("Mobile")!=-1){
+		var status = $("#"+menuName+"Mobile").css("display");
+	}
+	
+	if(status=="none"){
+		if($('.mobileParentPostInfo:visible').length>0){
+			$("#"+menuName+"Mobile").css("display","block");
+			
+			//console.log($(button).attr('id').indexOf("Mobile"));
+			
+			if(isMobile()){
+				$("#"+menuName).css("display","inline");
+				document.getElementById(menuName).style.left = 0;
+			}
+		}
+		else{
+			document.getElementById(menuName).style.left = 0;
+			var dengus = findPos(document.getElementById($(button).attr('id')));
+			document.getElementById(menuName).style.left = dengus + "px";
+			$("#"+menuName).css("display","block");
+		}
+	}
+	else{
+		$(".postMenu").css("display","none");
+	}
 }
-$(document).mouseup(function (e) {
-  var container = $("#overlay");
-  var menus = $("div.postMenu");
-  if (document.getElementById("overlay").style.display == "block") {
-    if (container.has(e.target).length === 0) {
-      toggleNavMenu(document.getElementsByClassName('topNavRight')[0].firstElementChild, 1);
-    }
-  }
-  if (menus.has(e.target).length === 0) {
-    var openMenus = $("div.postMenu:visible");
-    if (openMenus.length > 0) {
-      var buttonID = $(openMenus).attr("id").replace("Menu", "MenuButton");
-      if ($("#" + buttonID).has(e.target).length === 0) {
-        openMenus.hide();
-      }
-    }
-  }
+
+$(document).mouseup(function (e){
+    var container = $("#overlay");
+	var menus = $("div.postMenu");
+	
+	if(document.getElementById("overlay").style.display=="block"){
+		if (container.has(e.target).length === 0){
+			//container='<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">[Board Options]</a>';
+			//container.hide();
+			//$('#topNavRight').children().html('<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">[Board Options]</a>');
+			toggleNavMenu(document.getElementsByClassName('topNavRight')[0].firstElementChild,1);
+		}
+	}
+	
+	
+	// i have no idea what i just did
+	if (menus.has(e.target).length === 0){
+		var openMenus = $("div.postMenu:visible");
+		//console.log(openMenus);
+		
+		if(openMenus.length > 0){
+			var buttonID = $(openMenus).attr("id").replace("Menu","MenuButton");
+			
+			if($("#"+buttonID).has(e.target).length === 0){
+				openMenus.hide();
+			}
+		}
+	}
 });
 
-function reportPostPopup(post) {
-  reportWindow = window.open(boardPath + 'wakaba.pl?task=report&num=' + post, '', 'width=405px,height=215px,scrollbars=no');
+function reportPostPopup(post){
+	reportWindow = window.open(boardPath + 'wakaba.pl?task=report&num='+post,'', 'width=405px,height=215px,scrollbars=no');
 }
 
 function findPos(obj) {
-  var curleft = curtop = 0;
-  if (obj.offsetParent) {
-    do {
-      curleft += obj.offsetLeft;
-    } while (obj = obj.offsetParent);
-    return curleft;
-  }
+	var curleft = curtop = 0;
+	
+	if (obj.offsetParent) {
+		do {
+			curleft += obj.offsetLeft;
+			//curtop += obj.offsetTop;
+		} while (obj = obj.offsetParent);
+		//return [curleft,curtop];
+		return curleft;
+	}
 }
 
 function findPosY(obj) {
-  var curleft = curtop = 0;
-  if (obj.offsetParent) {
-    do {
-      curtop += obj.offsetTop;
-    } while (obj = obj.offsetParent);
-    return curtop;
-  }
+	var curleft = curtop = 0;
+	
+	if (obj.offsetParent) {
+		do {
+			//curleft += obj.offsetLeft;
+			curtop += obj.offsetTop;
+		} while (obj = obj.offsetParent);
+		//return [curleft,curtop];
+		return curtop;
+	}
 }
 
-function showSub(menu) {
-  menu.lastElementChild.style.top = 0;
-  menu.lastElementChild.style.top = $(menu).position().top + "px";
-  menu.lastElementChild.style.display = "block";
-  if (menu.nextElementSibling.className == "hasSubMenu") {
-    if (menu.nextElementSibling.lastElementChild.style.display == "block") {
-      menu.nextElementSibling.lastElementChild.style.display = "none";
-    }
-  } else {
-    if (menu.previousElementSibling.lastElementChild.style.display == "block") {
-      menu.previousElementSibling.lastElementChild.style.display = "none";
-    }
-  }
+function showSub(menu){
+	menu.lastElementChild.style.top = 0;
+	menu.lastElementChild.style.top = $(menu).position().top + "px";
+	menu.lastElementChild.style.display = "block";
+	
+	if(menu.nextElementSibling.className=="hasSubMenu"){
+		if(menu.nextElementSibling.lastElementChild.style.display=="block"){
+			menu.nextElementSibling.lastElementChild.style.display = "none";
+		}
+	}
+	else{
+		if(menu.previousElementSibling.lastElementChild.style.display=="block"){
+			menu.previousElementSibling.lastElementChild.style.display = "none";
+		}	
+	}
 }
 
-function closeSub(menu) {
-  if (menu.nextElementSibling.className == "hasSubMenu") {
-    if (menu.nextElementSibling.lastElementChild.style.display == "block") {
-      menu.nextElementSibling.lastElementChild.style.display = "none";
-    }
-  } else if (menu.previousElementSibling.className == "hasSubMenu") {
-    if (menu.previousElementSibling.lastElementChild.style.display == "block") {
-      menu.previousElementSibling.lastElementChild.style.display = "none";
-    }
-  } else if (menu.previousElementSibling.previousElementSibling.className == "hasSubMenu") {
-    if (menu.previousElementSibling.previousElementSibling.lastElementChild.style.display == "block") {
-      menu.previousElementSibling.previousElementSibling.lastElementChild.style.display = "none";
-    }
-  }
+function closeSub(menu){
+	if(menu.nextElementSibling.className=="hasSubMenu"){
+		if(menu.nextElementSibling.lastElementChild.style.display=="block"){
+			menu.nextElementSibling.lastElementChild.style.display = "none";
+		}
+	}
+	else if (menu.previousElementSibling.className=="hasSubMenu"){
+		if(menu.previousElementSibling.lastElementChild.style.display=="block"){
+			menu.previousElementSibling.lastElementChild.style.display = "none";
+		}	
+	}
+	else if (menu.previousElementSibling.previousElementSibling.className=="hasSubMenu"){
+		if(menu.previousElementSibling.previousElementSibling.lastElementChild.style.display=="block"){
+			menu.previousElementSibling.previousElementSibling.lastElementChild.style.display = "none";
+		}	
+	}
 }
 
-function deletePost(postNumber) {
-  var board = boardDir;
-  window.location = boardPath + "wakaba.pl?task=delete&delete=" + postNumber + "&password=" + document.getElementById("delPass").value;
+function deletePost(postNumber){
+	var board = boardDir;
+	window.location = boardPath + "wakaba.pl?task=delete&delete="+postNumber+"&password="+document.getElementById("delPass").value;
 }
 
-function deleteImage(postNumber) {
-  var board = boardDir;
-  window.location = boardPath + "wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass").value;
+function deleteImage(postNumber){
+	var board = boardDir;
+	window.location = boardPath + "wakaba.pl?task=delete&delete="+postNumber+"&fileonly=1&password="+document.getElementById("delPass").value;
 }
 
-function togglePostForm() {
-  var postFormStatus = $("#postForm").css('display');
-  if (postFormStatus == "none") {
-    $("#postForm").css('display', 'block');
-  } else {
-    $("#postForm").css('display', 'none');
-  }
+function togglePostForm(){
+	var postFormStatus = $("#postForm").css('display');
+	
+	if(postFormStatus=="none"){
+		$("#postForm").css('display','table');
+	}
+	else{
+		$("#postForm").css('display','none');
+	}
 }
