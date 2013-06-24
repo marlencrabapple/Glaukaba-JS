@@ -43,8 +43,7 @@ function loadSavedSettings() {
       document.getElementById(settings[i]).value = localStorage.getItem(settings[i]);
     }
   }
-  if ((localStorage.getItem('reverseImgSearchLinks') == null) || (localStorage.getItem('reverseImgSearchLinks') == ''))
-    $('#reverseImgSearchLinks').val("# Remove the hash sign from the services you'd like to use.\n\n# reverse image search\n#//www.google.com/searchbyimage?image_url=%tn\n#//tineye.com/search?url=%tn\n#//3d.iqdb.org/?url=%tn\n#//regex.info/exif.cgi?imgurl=%img\n\n# uploaders:\n#//imgur.com/upload?url=%img\n#//ompldr.org/upload?url1=%img");
+  if ((localStorage.getItem('reverseImgSearchLinks') == null) || (localStorage.getItem('reverseImgSearchLinks') == '')) $('#reverseImgSearchLinks').val("# Remove the hash sign from the services you'd like to use.\n\n# reverse image search\n#//www.google.com/searchbyimage?image_url=%tn\n#//tineye.com/search?url=%tn\n#//3d.iqdb.org/?url=%tn\n#//regex.info/exif.cgi?imgurl=%img\n\n# uploaders:\n#//imgur.com/upload?url=%img\n#//ompldr.org/upload?url1=%img");
 }
 
 function imgExpPrep() {
@@ -72,7 +71,20 @@ function quotePreview() {
       href = $(postlink).attr('href');
       parentnum = href.substr(href.lastIndexOf('/') + 1, href.indexOf('#') - (href.lastIndexOf('/') + 1)).replace('.html', '');
       quoted = href.substr(href.indexOf('#') + 1);
-      jsonlink = noExt == 1 ? href.substr(0, href.indexOf('#') + 1) + '.json' : href.substr(0, href.indexOf('#') + 1).replace('.html', '.json');
+      if (href.indexOf('#') == -1) {
+        quoted = href.substr(href.lastIndexOf('/') + 1).replace('.html', '');
+        if (noExt == 1) {
+          jsonlink = href + '.json';
+        } else {
+          jsonlink = href.replace('.html', '.json');
+        }
+      } else {
+        if (noExt == 1) {
+          jsonlink = href.substr(0, (href.indexOf('#'))) + '.json';
+        } else {
+          jsonlink = href.substr(0, href.indexOf('#') + 1).replace('.html', '.json');
+        }
+      }
     } else {
       quoted = $(postlink).attr('id').replace('backlink', '');
     }
@@ -106,25 +118,22 @@ function quotePreview() {
       $(post).css('position', 'absolute');
       $(post).css('border', "1px solid #9E9E9E");
       $(post).find('div[id^=iq]').remove();
-      if ($(post).find('a.thumbLink').children('img.expandedThumb').length)
-        $(post).find('a.thumbLink').each(function (e) {
-          expandImage(this)
-        });
+      if ($(post).find('a.thumbLink').children('img.expandedThumb').length) $(post).find('a.thumbLink').each(function (e) {
+        expandImage(this)
+      });
       $(document).mousemove(function (e) {
         previewOffsetY = $(post).height();
         $(post).css('top', (e.pageY - (previewOffsetY + 10)) + "px");
         $(post).css('left', (e.pageX + 50) + "px");
       });
-      if ($('#qp_reply' + quoted).length == 0)
-        $('body').append(post);
+      if ($('#qp_reply' + quoted).length == 0) $('body').append(post);
       previewinprogress.resolve();
     }
   });
   $('.thread').on('mouseout', 'a.postlink, a.backlink', function () {
     href = $(this).attr('href');
     quoted = href.substr(href.indexOf('#') + 1);
-    if ($(previewinprogress).length <= 0)
-      return;
+    if ($(previewinprogress).length <= 0) return;
     $.when(previewinprogress).then(function () {
       $('div[id^=qp_]').remove();
     });
@@ -141,8 +150,7 @@ function appendPreview(post, quoted) {
     $(post).css('top', (e.pageY - (previewOffsetY + 10)) + "px");
     $(post).css('left', (e.pageX + 50) + "px");
   });
-  if ($('#qp_reply' + quoted).length == 0)
-    $('body').append(post);
+  if ($('#qp_reply' + quoted).length == 0) $('body').append(post);
 }
 
 function inlineQuote() {
@@ -155,7 +163,20 @@ function inlineQuote() {
       href = $(postlink).attr('href');
       parentnum = href.substr(href.lastIndexOf('/') + 1, href.indexOf('#') - (href.lastIndexOf('/') + 1)).replace('.html', '');
       quoted = href.substr(href.indexOf('#') + 1);
-      jsonlink = noExt == 1 ? href.substr(0, href.indexOf('#') + 1) + '.json' : href.substr(0, href.indexOf('#') + 1).replace('.html', '.json');
+      if (href.indexOf('#') == -1) {
+        quoted = href.substr(href.lastIndexOf('/') + 1).replace('.html', '');
+        if (noExt == 1) {
+          jsonlink = href + '.json';
+        } else {
+          jsonlink = href.replace('.html', '.json');
+        }
+      } else {
+        if (noExt == 1) {
+          jsonlink = href.substr(0, (href.indexOf('#'))) + '.json';
+        } else {
+          jsonlink = href.substr(0, href.indexOf('#') + 1).replace('.html', '.json');
+        }
+      }
     } else {
       quoted = $(postlink).attr('id').replace('backlink', '');
     }
@@ -194,22 +215,18 @@ function inlineQuote() {
             expandImage(this)
           });
         }
-        if ($(postlink).next('#iq_reply' + quoted).length == 0)
-          if ($(postlink).attr('class') != 'backlink')
-            $(postlink).after(post);
-          else {
-            if (isMobile()) {
-              $(post).css('box-sizing', 'border-box');
-            }
-            $(postlink).parent().parent().parent().children('blockquote').before(post);
+        if ($(postlink).next('#iq_reply' + quoted).length == 0) if ($(postlink).attr('class') != 'backlink') $(postlink).after(post);
+        else {
+          if (isMobile()) {
+            $(post).css('box-sizing', 'border-box');
           }
+          $(postlink).parent().parent().parent().children('blockquote').before(post);
+        }
         inlineinprogress.resolve();
       }
     } else {
-      if ($(postlink).attr('class') != 'backlink')
-        $(postlink).next('#iq_reply' + quoted).remove();
-      else
-        $(postlink).parent().parent().parent().children('#iq_reply' + quoted).remove();
+      if ($(postlink).attr('class') != 'backlink') $(postlink).next('#iq_reply' + quoted).remove();
+      else $(postlink).parent().parent().parent().children('#iq_reply' + quoted).remove();
     }
   });
 }
@@ -218,8 +235,7 @@ function appendInlineQuote(quoted, post, postlink) {
   post = $(post).children('.reply');
   $(post).attr('id', 'iq_' + $(post).attr('id'));
   $(post).css('border', "1px solid #9E9E9E");
-  if ($(postlink).next('#iq_reply' + quoted).length == 0)
-    $(postlink).after(post);
+  if ($(postlink).next('#iq_reply' + quoted).length == 0) $(postlink).after(post);
 }
 
 function updaterPrep() {
@@ -233,8 +249,7 @@ function updaterPrep() {
 }
 
 function hideThreadPrep() {
-  if (document.body.className != "indexpage")
-    return;
+  if (document.body.className != "indexpage") return;
   if ($('#postFormToggle').css('display') == 'none') {
     $('.parentPost').each(function () {
       var parentpost = this;
@@ -280,13 +295,11 @@ function hideReplyPrep() {
 }
 
 function postExpansionPrep() {
-  if (document.body.className == "threadpage")
-    return;
+  if (document.body.className == "threadpage") return;
   var links = document.getElementsByClassName("abbrev");
   for (var i = 0; i < links.length; i++) {
     var child = links[i].firstElementChild;
-    if (!child)
-      continue;
+    if (!child) continue;
     child.addEventListener("click", function (e) {
       expandPost(this);
       e.preventDefault();
@@ -295,8 +308,7 @@ function postExpansionPrep() {
 }
 
 function threadExpansionPrep() {
-  if (document.body.className == "threadpage")
-    return;
+  if (document.body.className == "threadpage") return;
   var links = $('.omittedposts.desktop');
   if ($('#postFormToggle').css('display') == 'none') {
     for (var i = 0; i < links.length; i++) {
@@ -326,8 +338,7 @@ function backlinkPrep() {
       backlink.id = "backlink" + postLinkContainerNum;
       backlink.className = "backlink";
       backlink.style.paddingRight = "3px";
-      if ($(posts).find("#backlink" + postLinkContainerNum).length == 0)
-        $(posts).find('.rightblock').append(backlink);
+      if ($(posts).find("#backlink" + postLinkContainerNum).length == 0) $(posts).find('.rightblock').append(backlink);
     }
   });
 }
@@ -533,8 +544,7 @@ function setCache(parentnum, posts) {
 }
 
 function makeReverseSearchLinks() {
-  if (localStorage['reverseImgSearchLinks'] == null)
-    return;
+  if (localStorage['reverseImgSearchLinks'] == null) return;
   links = localStorage['reverseImgSearchLinks'].split('\n');
   $('.thumbLink').each(function (i, img) {
     $(links).each(function (a, link) {
@@ -546,10 +556,8 @@ function makeReverseSearchLinks() {
         reallink.href = link;
         linktext = reallink.host.substr(0, reallink.host.lastIndexOf('.')).replace('www.', '');
         reallink = ' <a target="_blank" class="reverseimglink" href="' + reallink + '">' + linktext + '</a>';
-        if ($(img).parent('.reply, .parentPost').length != 0)
-          $(img).parent().children('.fileinfo').children('.filesize').append(reallink);
-        else
-          $(img).parentsUntil('.reply, .parentPost').last().parent().children('.fileinfo').children('.filesize').append(reallink);
+        if ($(img).parent('.reply, .parentPost').length != 0) $(img).parent().children('.fileinfo').children('.filesize').append(reallink);
+        else $(img).parentsUntil('.reply, .parentPost').last().parent().children('.fileinfo').children('.filesize').append(reallink);
       }
     });
   });
