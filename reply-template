@@ -16,7 +16,7 @@
 				</span>
 				<a href="javascript:void(0)" onclick="togglePostMenu(this);"  class="postMenuButton" id="postMenuButton<%= this.no %>">[<span></span>]</a>
 				<div class="postMenu" id="postMenu<%= this.no %>">
-					<a onmouseover="closeSub(this);" href="javascript:void(0)" onclick="reportPostPopup(<%= this.no %>, '<%= boardDir %>')" class="postMenuItem">Report this post</a>
+					<a onmouseover="closeSub(this);" href="javascript:void(0)" onclick="reportPostPopup(<%= this.no %>, '<%= sitevars.boarddir %>')" class="postMenuItem">Report this post</a>
 					<div class="hasSubMenu" onmouseover="showSub(this);">
 						<span class="postMenuItem">Delete</span>
 						<div onmouseover="$(this).addClass('focused')" class="postMenu subMenu">
@@ -30,11 +30,11 @@
 							<a class="postMenuItem" href="javascript:void(0);">Not yet implemented</a>
 						</div>
 					</div>
-					<% if(social==1){ %>
+					<% if(sitevars.social==1){ %>
 						<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="facebookPost(window.location.hostname,<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Facebook</a>
 						<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="twitterPost(window.location.hostname,<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Twitter</a>
 					<% } %>
-					<a href="<%= boardPath %>res/<%= this.parent %>#<%= this.no %>" class="postMenuItem" target="_blank">Permalink</a>
+					<a href="<%= sitevars.boardpath %>res/<%= this.parent %>#<%= this.no %>" class="postMenuItem" target="_blank">Permalink</a>
 				</div>
 			</div>
 			<div style="clear:both"></div>
@@ -43,27 +43,27 @@
 			<div class="fileinfo">
 				<span class="filesize">
 					File:
-					<a target="_blank" href="<%= boardDir +  this.image %>" title="<%= this.filename %>"><%= this.filename %></a>
-					- (<em><%= ~~(this.fsize/1024) %> KB, <%= this.w %>x<%= this.h %></em>)
+					<a target="_blank" href="<%= sitevars.boarddir +  this.image %>" title="<%= this.filename %>"><%= this.filename %></a>
+					- (<%= ~~(this.fsize/1024) %> KB, <%= this.w %>x<%= this.h %>)
 				</span>
 			</div>
 			<% if(this.tn_w){ %>
-				<a class="thumbLink" target="_blank" href="<%= boardPath + this.image %>">
+				<a class="thumbLink" target="_blank" href="<%= sitevars.boardpath + this.image %>">
 					<% if(!this.spoiler){ %>
-						<img src="<%= boardPath + this.tnfname %>" alt="<%= this.size %>" class="thumb replyThumb" data-md5="<%= this.md5 %>" style="width: <%= this.tn_w*.504 %>px; height: <%= this.tn_h*.504 %>px;" />
+						<img src="<%= sitevars.boardpath + this.tnfname %>" alt="<%= this.size %>" class="thumb replyThumb" data-md5="<%= this.md5 %>" style="width: <%= this.tn_w*.504 %>px; height: <%= this.tn_h*.504 %>px;" />
 					<% } %>
 					<% if(this.spoiler){ %>
-						<img src="<%= domain %>img/spoiler.png" alt="<%= this.size %>" class="thumb replyThumb" data-md5="<%= this.md5 %>" />
+						<img src="<%= sitevars.domain %>img/spoiler.png" alt="<%= this.size %>" class="thumb replyThumb" data-md5="<%= this.md5 %>" />
 					<% } %>
 				</a>
 			<% } %>
 			<% if(!this.tn_w){ %>
 				<% if(!this.filename){ %>
-					<a target="_blank" class="thumbLink" href="<%= boardPath + this.image %>">
-					<img src="<%= domain %>img/deleted.png" alt="" class="thumb replyThumb deletedImg" /></a>
+					<a target="_blank" class="thumbLink" href="<%= sitevars.boardpath + this.image %>">
+					<img src="<%= sitevars.domain %>img/deleted.png" alt="" class="thumb replyThumb deletedImg" /></a>
 				<% } %>
 				<% if(this.filename){ %>
-					<div class="thumb replyThumb nothumb"><a class="thumbLink" target="_blank" href="<%= boardPath +  this.image %>">No Thumbnail</a></div>
+					<div class="thumb replyThumb nothumb"><a class="thumbLink" target="_blank" href="<%= sitevars.boardpath +  this.image %>">No Thumbnail</a></div>
 				<% } %>
 			<% } %>
 		<% } %>

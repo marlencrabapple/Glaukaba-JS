@@ -37,11 +37,11 @@ function hide_captcha() {
     console.log(pass);
     var taargus = pass.split("##");
     if (taargus[2] == 1) {
-      var logoutUrl = boardPath + "wakaba.pl?task=logout&type=pass";
-      if (noExt == 1) {
-        logoutUrl = domain + "auth/logout";
+      var logouturl = sitevars.boardpath + "wakaba.pl?task=logout&type=pass";
+      if (sitevars.noext == 1) {
+        logouturl = sitevars.domain + "pass/logout";
       }
-      $($("#recaptchaContainer").children(".postField")[0]).html('<div style="padding: 5px;">You are using a ' + sitename + ' pass. [<a href="' + logoutUrl + '">Logout</a>]</div>');
+      $($("#recaptchaContainer").children(".postField")[0]).html('<div style="padding: 5px;">You are using a ' + sitevars.sitename + ' pass. [<a href="' + logouturl + '">Logout</a>]</div>');
       hasPass = 1;
     } else {
       hasPass = 0;
@@ -154,12 +154,14 @@ function do_ban(el) {
   if (reason) document.location = el.href + "&comment=" + encodeURIComponent(reason);
   return false;
 }
+
 window.onunload = function (e) {
   if (style_cookie) {
     var title = get_active_stylesheet();
     set_cookie(style_cookie, title, 365);
   }
 }
+
 window.onload = function (e) {
   var match;
   if (match = /#i([0-9]+)/.exec(document.location.toString())) if (!document.getElementById("field4").value) insert(">>" + match[1]);
@@ -184,6 +186,7 @@ window.onload = function (e) {
   prettyPrint();
   hide_captcha();
 }
+
 if (style_cookie) {
   var cookie = get_cookie(style_cookie);
   var title = cookie ? cookie : get_preferred_stylesheet();
@@ -230,6 +233,7 @@ function togglePostMenu(button) {
     $(".postMenu").css("display", "none");
   }
 }
+
 $(document).mouseup(function (e) {
   var container = $("#overlay");
   var menus = $("div.postMenu");
@@ -250,7 +254,7 @@ $(document).mouseup(function (e) {
 });
 
 function reportPostPopup(post) {
-  reportWindow = window.open(boardPath + 'wakaba.pl?task=report&num=' + post, '', 'width=405px,height=215px,scrollbars=no');
+  reportWindow = window.open(sitevars.boardpath + 'wakaba.pl?task=report&num=' + post, '', 'width=405px,height=215px,scrollbars=no');
 }
 
 function findPos(obj) {
@@ -305,13 +309,13 @@ function closeSub(menu) {
 }
 
 function deletePost(postNumber) {
-  var board = boardDir;
-  window.location = boardPath + "wakaba.pl?task=delete&delete=" + postNumber + "&password=" + document.getElementById("delPass").value;
+  var board = sitevars.boarddir;
+  window.location = sitevars.boardpath + "wakaba.pl?task=delete&delete=" + postNumber + "&password=" + document.getElementById("delPass").value;
 }
 
 function deleteImage(postNumber) {
-  var board = boardDir;
-  window.location = boardPath + "wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass").value;
+  var board = sitevars.boarddir;
+  window.location = sitevars.boardpath + "wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass").value;
 }
 
 function togglePostForm() {

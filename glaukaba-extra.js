@@ -12,7 +12,7 @@ var postsInTitle = 0;
 var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
-var replytemplatever = 1;
+var replytemplatever = 3;
 if (typeof sessionStorage['yourPosts'] != 'undefined') {
   yourPosts = JSON.parse(sessionStorage['yourPosts']);
 }
@@ -54,7 +54,7 @@ function imgExpPrep() {
 }
 
 function qrPrep() {
-  var board = boardDir;
+  var board = sitevars.boarddir;
   $("body").on("click", "a.refLinkInner", function (e) {
     quickReply(this, board);
     e.preventDefault();
@@ -73,13 +73,13 @@ function quotePreview() {
       quoted = href.substr(href.indexOf('#') + 1);
       if (href.indexOf('#') == -1) {
         quoted = href.substr(href.lastIndexOf('/') + 1).replace('.html', '');
-        if (noExt == 1) {
+        if (sitevars.noext == 1) {
           jsonlink = href + '.json';
         } else {
           jsonlink = href.replace('.html', '.json');
         }
       } else {
-        if (noExt == 1) {
+        if (sitevars.noext == 1) {
           jsonlink = href.substr(0, (href.indexOf('#'))) + '.json';
         } else {
           jsonlink = href.substr(0, href.indexOf('#') + 1).replace('.html', '.json');
@@ -165,13 +165,13 @@ function inlineQuote() {
       quoted = href.substr(href.indexOf('#') + 1);
       if (href.indexOf('#') == -1) {
         quoted = href.substr(href.lastIndexOf('/') + 1).replace('.html', '');
-        if (noExt == 1) {
+        if (sitevars.noext == 1) {
           jsonlink = href + '.json';
         } else {
           jsonlink = href.replace('.html', '.json');
         }
       } else {
-        if (noExt == 1) {
+        if (sitevars.noext == 1) {
           jsonlink = href.substr(0, (href.indexOf('#'))) + '.json';
         } else {
           jsonlink = href.substr(0, href.indexOf('#') + 1).replace('.html', '.json');
@@ -471,7 +471,7 @@ $(document).scroll(function () {
 });
 
 function doIt(again) {
-  if (noExt == 1) {
+  if (sitevars.noext == 1) {
     ext = "";
   }
   if ($('body').attr('class')) {
@@ -549,8 +549,8 @@ function makeReverseSearchLinks() {
   $('.thumbLink').each(function (i, img) {
     $(links).each(function (a, link) {
       if ((link.indexOf('#') != 0) && (link.length > 1)) {
-        link = link.replace('%tn', encodeURIComponent(domain.substr(0, domain.length - 1).replace('//', 'http://') + $(img).children('img').attr('src')));
-        link = link.replace('%img', encodeURIComponent(domain.substr(0, domain.length - 1).replace('//', 'http://') + $(img).attr('href')));
+        link = link.replace('%tn', encodeURIComponent(sitevars.domain.substr(0, sitevars.domain.length - 1).replace('//', 'http://') + $(img).children('img').attr('src')));
+        link = link.replace('%img', encodeURIComponent(sitevars.domain.substr(0, sitevars.domain.length - 1).replace('//', 'http://') + $(img).attr('href')));
         link = link.replace('%md5', encodeURIComponent($(img).children('img').attr('data-md5')));
         reallink = document.createElement('a');
         reallink.href = link;
@@ -578,8 +578,8 @@ function expandPost(link) {
 }
 
 function expandThread(parentDivId, mode) {
-  var board = boardDir;
-  var threadLink = boardPath + "res/" + parentDivId.replace("parent", "") + ext;
+  var board = sitevars.boarddir;
+  var threadLink = sitevars.boardpath + "res/" + parentDivId.replace("parent", "") + ext;
   if (mode == 0) {
     $.get(threadLink, function (data) {
       var loadedThread = $(data).find(".replyContainer");
@@ -678,7 +678,7 @@ function formStuff() {
   $('#qrActualForm').submit(function (e) {
     var form = this;
     var action = $(this).attr('action');
-    var formData = new FormData(this)
+    var formData = new FormData(this);
     e.preventDefault();
     document.getElementById("qrField3s").value = "Submitting...";
     var oReq = new XMLHttpRequest();
@@ -767,7 +767,7 @@ function expandImage(thumbLink) {
     }
   } else {
     var thumbFname = thumbLink.href.substring(thumbLink.href.lastIndexOf("src/") + 4, thumbLink.href.lastIndexOf("src/") + 17);
-    image.src = boardPath + "thumb/" + thumbFname + "s.jpg";
+    image.src = sitevars.boardpath + "thumb/" + thumbFname + "s.jpg";
     image.removeAttribute("style");
     dicks = 1;
     if (image.className.indexOf("opThumb") == -1) {
@@ -825,14 +825,14 @@ function updateThread() {
   $.ajax({
     type: 'HEAD',
     dataType: 'json',
-    url: boardPath + 'res/' + $('.parentPost').attr('id').replace('parent', '') + '.json',
+    url: sitevars.boardpath + 'res/' + $('.parentPost').attr('id').replace('parent', '') + '.json',
     success: function (data, status, xhrobj) {
       if (modified != xhrobj.getResponseHeader('Last-Modified')) {
         modified = xhrobj.getResponseHeader('Last-Modified');
         $.ajax({
           type: 'GET',
           dataType: 'json',
-          url: boardPath + 'res/' + $('.parentPost').attr('id').replace('parent', '') + '.json',
+          url: sitevars.boardpath + 'res/' + $('.parentPost').attr('id').replace('parent', '') + '.json',
           success: function (data, status, xhrobj) {
             var newPosts = [];
             var lastPost = $('.reply, .parentPost').last().attr('id').replace("reply", "");
@@ -888,7 +888,7 @@ function makeReply(data, callback) {
   } else {
     $.ajax({
       type: 'GET',
-      url: domain + 'js/reply-template',
+      url: sitevars.domain + 'js/reply-template',
       success: function (tpl) {
         localStorage['replytemplate'] = tpl;
         localStorage['replytemplate_ver'] = replytemplatever;
@@ -961,7 +961,7 @@ function hideThreadMobile(button, threadnum) {
 function birthday(birthday, play) {
   if (birthday == 0) {
     for (var i = 0; i < document.getElementsByClassName('hat').length; i++) {
-      document.getElementsByClassName('hat')[i].innerHTML = "<img src='" + domain + "img/partyhat.gif' style='position:absolute; margin-top:-100px;'/>"
+      document.getElementsByClassName('hat')[i].innerHTML = "<img src='" + sitevars.domain + "img/partyhat.gif' style='position:absolute; margin-top:-100px;'/>"
     }
     document.getElementById("announcement").childNodes[1].innerHTML += "<br /><br /><a href='javascript:void(0)' onclick='birthday(1,1)'>Enable Party Hard mode</a>";
   }
@@ -1005,18 +1005,18 @@ function partyHard() {
   birthday = 1;
 }
 
-function twitterPost(domain, post, parent) {
+function twitterPost(post, parent) {
   if (parent == 0) {
     parent = post;
   }
-  var board = boardDir;
-  window.open("https://twitter.com/share?url=http://" + encodeURI(domain + "/" + board + "/res/" + parent + ext) + "%23" + post);
+  var board = sitevars.boarddir;
+  window.open("https://twitter.com/share?url=http://" + encodeURI(sitevars.domain + "/" + board + "/res/" + parent + ext) + "%23" + post);
 }
 
-function facebookPost(domain, post, parent) {
+function facebookPost(post, parent) {
   if (parent == 0) {
     parent = post;
   }
-  var board = boardDir;
-  window.open("http://www.facebook.com/sharer.php?u=http://" + domain + "/" + board + "/res/" + parent + ext + "%23" + post);
+  var board = sitevars.boarddir;
+  window.open("http://www.facebook.com/sharer.php?u=http://" + sitevars.domain + "/" + board + "/res/" + parent + ext + "%23" + post);
 }
