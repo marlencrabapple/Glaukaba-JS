@@ -34,7 +34,6 @@ function get_password(name) {
 function hide_captcha() {
   var pass = get_cookie("wakapass");
   if (pass) {
-    console.log(pass);
     var taargus = pass.split("##");
     if (taargus[2] == 1) {
       var logouturl = sitevars.boardpath + "wakaba.pl?task=logout&type=pass";
@@ -69,7 +68,8 @@ function insert(text) {
 
 function highlight(post) {
   var cells = document.getElementsByTagName("div");
-  for (var i = 0; i < cells.length; i++) if (cells[i].className == "reply highlight") cells[i].className = "reply";
+  for (var i = 0; i < cells.length; i++)
+    if (cells[i].className == "reply highlight") cells[i].className = "reply";
   var reply = document.getElementById("reply" + post);
   if (reply) {
     reply.className = "reply highlight";
@@ -154,18 +154,19 @@ function do_ban(el) {
   if (reason) document.location = el.href + "&comment=" + encodeURIComponent(reason);
   return false;
 }
-
 window.onunload = function (e) {
   if (style_cookie) {
     var title = get_active_stylesheet();
     set_cookie(style_cookie, title, 365);
   }
 }
-
 window.onload = function (e) {
   var match;
-  if (match = /#i([0-9]+)/.exec(document.location.toString())) if (!document.getElementById("field4").value) insert(">>" + match[1]);
-  if (match = /#([0-9]+)/.exec(document.location.toString())) highlight(match[1]);
+  if (match = /#i([0-9]+)/.exec(document.location.toString()))
+    if (!document.getElementById("field4").value)
+      insert(">>" + match[1]);
+  if (match = /#([0-9]+)/.exec(document.location.toString()))
+    highlight(match[1]);
   if (window.location.href.indexOf("admin") == -1) {
     $("#boardList").children().each(function (option) {
       if ($(this).text() == "Select a board") {
@@ -186,7 +187,6 @@ window.onload = function (e) {
   prettyPrint();
   hide_captcha();
 }
-
 if (style_cookie) {
   var cookie = get_cookie(style_cookie);
   var title = cookie ? cookie : get_preferred_stylesheet();
@@ -200,11 +200,11 @@ function preventDef(event) {
 function toggleNavMenu(link, mode) {
   if (mode == 0) {
     document.getElementById("overlay").style.display = "block";
-    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>'
+    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>';
     loadSavedSettings();
   } else {
     document.getElementById("overlay").style.display = "none";
-    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>'
+    $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>';
   }
 }
 
@@ -227,13 +227,12 @@ function togglePostMenu(button) {
       document.getElementById(menuName).style.left = 0;
       var dengus = findPos(document.getElementById($(button).attr('id')));
       document.getElementById(menuName).style.left = dengus + "px";
-      $("#" + menuName).css("display", "block");
+      $(button).siblings('.postMenu').css("display", "block");
     }
   } else {
     $(".postMenu").css("display", "none");
   }
 }
-
 $(document).mouseup(function (e) {
   var container = $("#overlay");
   var menus = $("div.postMenu");

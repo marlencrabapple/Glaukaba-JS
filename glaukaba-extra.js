@@ -12,7 +12,8 @@ var postsInTitle = 0;
 var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
-var replytemplatever = 3;
+var replytemplatever = 8;
+
 if (typeof sessionStorage['yourPosts'] != 'undefined') {
   yourPosts = JSON.parse(sessionStorage['yourPosts']);
 }
@@ -43,7 +44,8 @@ function loadSavedSettings() {
       document.getElementById(settings[i]).value = localStorage.getItem(settings[i]);
     }
   }
-  if ((localStorage.getItem('reverseImgSearchLinks') == null) || (localStorage.getItem('reverseImgSearchLinks') == '')) $('#reverseImgSearchLinks').val("# Remove the hash sign from the services you'd like to use.\n\n# reverse image search\n#//www.google.com/searchbyimage?image_url=%tn\n#//tineye.com/search?url=%tn\n#//3d.iqdb.org/?url=%tn\n#//regex.info/exif.cgi?imgurl=%img\n\n# uploaders:\n#//imgur.com/upload?url=%img\n#//ompldr.org/upload?url1=%img");
+  if ((localStorage.getItem('reverseImgSearchLinks') == null) || (localStorage.getItem('reverseImgSearchLinks') == ''))
+    $('#reverseImgSearchLinks').val("# Remove the hash sign from the services you'd like to use.\n\n# reverse image search\n#//www.google.com/searchbyimage?image_url=%tn\n#//tineye.com/search?url=%tn\n#//3d.iqdb.org/?url=%tn\n#//regex.info/exif.cgi?imgurl=%img\n\n# uploaders:\n#//imgur.com/upload?url=%img\n#//ompldr.org/upload?url1=%img");
 }
 
 function imgExpPrep() {
@@ -67,6 +69,18 @@ function quotePreview() {
     previewinprogress = $.Deferred();
     $('div[id^=qp_]').remove();
     postlink = this;
+    crossboard = '';
+    if ($(postlink).html().replace(/[^\/]/g, "").length == 2) {
+      if ($(postlink).html().replace(/[^0-9]/g, "").length > 0) {
+        crossboard = $(postlink).html().replace(/[0-9]*/g, "");
+        crossboard = crossboard.replace(/&gt;*/g, "");
+        crossboard = crossboard.replace(/[\/]*/g, "");
+      } else {
+        crossboard = $(postlink).html().replace(/&gt;*/g, "");
+        crossboard = crossboard.replace(/[\/]*/g, "");
+        return;
+      }
+    }
     if ($(postlink).attr('class') != 'backlink') {
       href = $(postlink).attr('href');
       parentnum = href.substr(href.lastIndexOf('/') + 1, href.indexOf('#') - (href.lastIndexOf('/') + 1)).replace('.html', '');
@@ -93,6 +107,7 @@ function quotePreview() {
       if (cachedposts) {
         $(cachedposts.posts).each(function (i, item) {
           if (item.no == quoted) {
+            item.crossboard = crossboard;
             makeReply(item, function (post) {
               appendPreview(post, quoted);
               previewinprogress.resolve();
@@ -104,6 +119,7 @@ function quotePreview() {
           setCache(parentnum, data);
           $(data.posts).each(function (i, item) {
             if (item.no == quoted) {
+              item.crossboard = crossboard;
               makeReply(item, function (post) {
                 appendPreview(post, quoted);
                 previewinprogress.resolve();
@@ -116,24 +132,28 @@ function quotePreview() {
       post = $('#reply' + quoted).clone();
       $(post).attr('id', 'qp_' + $(post).attr('id'));
       $(post).css('position', 'absolute');
+      $(post).css('display', 'block');
       $(post).css('border', "1px solid #9E9E9E");
       $(post).find('div[id^=iq]').remove();
-      if ($(post).find('a.thumbLink').children('img.expandedThumb').length) $(post).find('a.thumbLink').each(function (e) {
-        expandImage(this)
-      });
+      if ($(post).find('a.thumbLink').children('img.expandedThumb').length)
+        $(post).find('a.thumbLink').each(function (e) {
+          expandImage(this)
+        });
       $(document).mousemove(function (e) {
         previewOffsetY = $(post).height();
         $(post).css('top', (e.pageY - (previewOffsetY + 10)) + "px");
         $(post).css('left', (e.pageX + 50) + "px");
       });
-      if ($('#qp_reply' + quoted).length == 0) $('body').append(post);
+      if ($('#qp_reply' + quoted).length == 0)
+        $('body').append(post);
       previewinprogress.resolve();
     }
   });
   $('.thread').on('mouseout', 'a.postlink, a.backlink', function () {
     href = $(this).attr('href');
     quoted = href.substr(href.indexOf('#') + 1);
-    if ($(previewinprogress).length <= 0) return;
+    if ($(previewinprogress).length <= 0)
+      return;
     $.when(previewinprogress).then(function () {
       $('div[id^=qp_]').remove();
     });
@@ -145,12 +165,15 @@ function appendPreview(post, quoted) {
   $(post).attr('id', 'qp_' + $(post).attr('id'));
   $(post).css('position', 'absolute');
   $(post).css('border', "1px solid #9E9E9E");
+  $(post).css('display', 'block');
+  $(post).addClass('qp_reply');
   $(document).mousemove(function (e) {
     previewOffsetY = $(post).height();
     $(post).css('top', (e.pageY - (previewOffsetY + 10)) + "px");
     $(post).css('left', (e.pageX + 50) + "px");
   });
-  if ($('#qp_reply' + quoted).length == 0) $('body').append(post);
+  if ($('#qp_reply' + quoted).length == 0)
+    $('body').append(post);
 }
 
 function inlineQuote() {
@@ -159,6 +182,18 @@ function inlineQuote() {
     postlink = this;
     e.preventDefault();
     inlineinprogress = $.Deferred();
+    crossboard = '';
+    if ($(postlink).html().replace(/[^\/]/g, "").length == 2) {
+      if ($(postlink).html().replace(/[^0-9]/g, "").length > 0) {
+        crossboard = $(postlink).html().replace(/[0-9]*/g, "");
+        crossboard = crossboard.replace(/&gt;*/g, "");
+        crossboard = crossboard.replace(/[\/]*/g, "");
+      } else {
+        crossboard = $(postlink).html().replace(/&gt;*/g, "");
+        crossboard = crossboard.replace(/[\/]*/g, "");
+        window.location.href = sitevars.domain + crossboard;
+      }
+    }
     if ($(postlink).attr('class') != 'backlink') {
       href = $(postlink).attr('href');
       parentnum = href.substr(href.lastIndexOf('/') + 1, href.indexOf('#') - (href.lastIndexOf('/') + 1)).replace('.html', '');
@@ -186,6 +221,7 @@ function inlineQuote() {
         if (cachedposts) {
           $(cachedposts.posts).each(function (i, item) {
             if (item.no == quoted) {
+              item.crossboard = crossboard;
               makeReply(item, function (post) {
                 appendInlineQuote(quoted, post, postlink);
                 inlineinprogress.resolve();
@@ -197,6 +233,7 @@ function inlineQuote() {
             setCache(parentnum, data);
             $(data.posts).each(function (i, item) {
               if (item.no == quoted) {
+                item.crossboard = crossboard;
                 makeReply(item, function (post) {
                   appendInlineQuote(quoted, post, postlink);
                   inlineinprogress.resolve();
@@ -215,18 +252,22 @@ function inlineQuote() {
             expandImage(this)
           });
         }
-        if ($(postlink).next('#iq_reply' + quoted).length == 0) if ($(postlink).attr('class') != 'backlink') $(postlink).after(post);
-        else {
-          if (isMobile()) {
-            $(post).css('box-sizing', 'border-box');
+        if ($(postlink).next('#iq_reply' + quoted).length == 0)
+          if ($(postlink).attr('class') != 'backlink')
+            $(postlink).after(post);
+          else {
+            if (isMobile()) {
+              $(post).css('box-sizing', 'border-box');
+            }
+            $(postlink).parent().parent().parent().children('blockquote').before(post);
           }
-          $(postlink).parent().parent().parent().children('blockquote').before(post);
-        }
         inlineinprogress.resolve();
       }
     } else {
-      if ($(postlink).attr('class') != 'backlink') $(postlink).next('#iq_reply' + quoted).remove();
-      else $(postlink).parent().parent().parent().children('#iq_reply' + quoted).remove();
+      if ($(postlink).attr('class') != 'backlink')
+        $(postlink).next('#iq_reply' + quoted).remove();
+      else
+        $(postlink).parent().parent().parent().children('#iq_reply' + quoted).remove();
     }
   });
 }
@@ -235,7 +276,8 @@ function appendInlineQuote(quoted, post, postlink) {
   post = $(post).children('.reply');
   $(post).attr('id', 'iq_' + $(post).attr('id'));
   $(post).css('border', "1px solid #9E9E9E");
-  if ($(postlink).next('#iq_reply' + quoted).length == 0) $(postlink).after(post);
+  if ($(postlink).next('#iq_reply' + quoted).length == 0)
+    $(postlink).after(post);
 }
 
 function updaterPrep() {
@@ -249,7 +291,8 @@ function updaterPrep() {
 }
 
 function hideThreadPrep() {
-  if (document.body.className != "indexpage") return;
+  if (document.body.className != "indexpage")
+    return;
   if ($('#postFormToggle').css('display') == 'none') {
     $('.parentPost').each(function () {
       var parentpost = this;
@@ -295,11 +338,13 @@ function hideReplyPrep() {
 }
 
 function postExpansionPrep() {
-  if (document.body.className == "threadpage") return;
+  if (document.body.className == "threadpage")
+    return;
   var links = document.getElementsByClassName("abbrev");
   for (var i = 0; i < links.length; i++) {
     var child = links[i].firstElementChild;
-    if (!child) continue;
+    if (!child)
+      continue;
     child.addEventListener("click", function (e) {
       expandPost(this);
       e.preventDefault();
@@ -307,24 +352,11 @@ function postExpansionPrep() {
   }
 }
 
-function threadExpansionPrep() {
-  if (document.body.className == "threadpage") return;
-  var links = $('.omittedposts.desktop');
-  if ($('#postFormToggle').css('display') == 'none') {
-    for (var i = 0; i < links.length; i++) {
-      var opid = $(links[i]).prev('.parentContainer').children('.parentPost').attr('id');
-      links[i].outerHTML = "<span class='omittedposts processed'><a style='text-decoration: none;' href='javascript:void(0)' onclick=expandThread('" + opid + "',0)>+ " + links[i].innerHTML.replace("Reply", "here") + "</a></span>"
-    }
-  } else {
-    return;
-  }
-}
-
 function backlinkPrep() {
   var postlinks = $('.postlink');
   var bls = $('.backlink').length;
   $(postlinks).each(function (taargus) {
-    if (($(this).parent('.capcodeReplies').length == 0) && ($(this).attr('href').indexOf("#") != -1)) {
+    if (($(this).parent('.capcodeReplies').length == 0) && ($(this).attr('href').indexOf("#") != -1) && ($(this).attr('href').indexOf('http') == -1)) {
       var postNum = $(this).text().replace(">>", "");
       postNum = postNum.replace(" (OP)", "");
       postNum = postNum.replace(" (You)", "");
@@ -338,7 +370,8 @@ function backlinkPrep() {
       backlink.id = "backlink" + postLinkContainerNum;
       backlink.className = "backlink";
       backlink.style.paddingRight = "3px";
-      if ($(posts).find("#backlink" + postLinkContainerNum).length == 0) $(posts).find('.rightblock').append(backlink);
+      if ($(posts).find("#backlink" + postLinkContainerNum).length == 0)
+        $(posts).find('.rightblock').append(backlink);
     }
   });
 }
@@ -387,7 +420,7 @@ function highlightPosts(identifier) {
 }
 
 function expandFilename(filename, mode) {
-  if (filename != undefined) {
+  if (typeof filename !== 'undefined') {
     var oldName = $(filename).text();
     if (mode == 0) {
       $(filename).text($(filename).attr("title"));
@@ -397,10 +430,10 @@ function expandFilename(filename, mode) {
       $(filename).attr("title", oldName);
     }
   } else {
-    $(".filesize").on("mouseover", "a", function () {
+    $(".thread").on("mouseover", ".filesize > a:first-child", function () {
       expandFilename(this, 0)
     });
-    $(".filesize").on("mouseout", "a", function () {
+    $(".thread").on("mouseout", ".filesize > a:first-child", function () {
       expandFilename(this, 1)
     });
   }
@@ -497,6 +530,12 @@ function doIt(again) {
       if (localStorage.getItem('threadUpdater') == 'true') {
         updaterPrep();
       }
+      if (localStorage.getItem('expandThreads') == 'true') {
+        expandThread(1);
+      }
+      if (localStorage.getItem('threadHiding') == 'true') {
+        hideThreadPrep();
+      }
       highlightPosts();
     }
     if (localStorage.getItem('markPosts') == 'true') {
@@ -505,17 +544,11 @@ function doIt(again) {
     if (localStorage.getItem('replyHiding') == 'true') {
       hideReplyPrep();
     }
-    if (localStorage.getItem('threadHiding') == 'true') {
-      hideThreadPrep();
-    }
     if (localStorage.getItem('anonymize') == 'true') {
       anonymize();
     }
     if (localStorage.getItem('expandPosts') == 'true') {
       postExpansionPrep();
-    }
-    if (localStorage.getItem('expandThreads') == 'true') {
-      threadExpansionPrep();
     }
     if (localStorage.getItem('inlineQuote') == 'true') {
       $('a.postlink').removeAttr("onclick");
@@ -544,9 +577,16 @@ function setCache(parentnum, posts) {
 }
 
 function makeReverseSearchLinks() {
-  if (localStorage['reverseImgSearchLinks'] == null) return;
+  if (localStorage['reverseImgSearchLinks'] == null)
+    return;
   links = localStorage['reverseImgSearchLinks'].split('\n');
   $('.thumbLink').each(function (i, img) {
+    append = 0;
+    if ($(img).parent('.reply, .parentPost').length != 0) {
+      append = 1 ? ($(img).parent().children('.fileinfo').children('.filesize').children('.reverseimglink').length == 0) : 0;
+    } else {
+      append = 1 ? $(img).parentsUntil('.reply, .parentPost').last().parent().children('.fileinfo').children('.filesize').children('.reverseimglink').length == 0 : 0;
+    }
     $(links).each(function (a, link) {
       if ((link.indexOf('#') != 0) && (link.length > 1)) {
         link = link.replace('%tn', encodeURIComponent(sitevars.domain.substr(0, sitevars.domain.length - 1).replace('//', 'http://') + $(img).children('img').attr('src')));
@@ -556,8 +596,15 @@ function makeReverseSearchLinks() {
         reallink.href = link;
         linktext = reallink.host.substr(0, reallink.host.lastIndexOf('.')).replace('www.', '');
         reallink = ' <a target="_blank" class="reverseimglink" href="' + reallink + '">' + linktext + '</a>';
-        if ($(img).parent('.reply, .parentPost').length != 0) $(img).parent().children('.fileinfo').children('.filesize').append(reallink);
-        else $(img).parentsUntil('.reply, .parentPost').last().parent().children('.fileinfo').children('.filesize').append(reallink);
+        if ($(img).parent('.reply, .parentPost').length != 0) {
+          if (append) {
+            $(img).parent().children('.fileinfo').children('.filesize').append(reallink);
+          }
+        } else {
+          if (append) {
+            $(img).parentsUntil('.reply, .parentPost').last().parent().children('.fileinfo').children('.filesize').append(reallink);
+          }
+        }
       }
     });
   });
@@ -577,21 +624,36 @@ function expandPost(link) {
   }
 }
 
-function expandThread(parentDivId, mode) {
-  var board = sitevars.boarddir;
-  var threadLink = sitevars.boardpath + "res/" + parentDivId.replace("parent", "") + ext;
-  if (mode == 0) {
-    $.get(threadLink, function (data) {
-      var loadedThread = $(data).find(".replyContainer");
-      var omittext = $($('#' + parentDivId).next()).html();
-      omittext = omittext.replace("+", "-");
-      omittext = omittext.replace(",0", ",1");
-      $($('#' + parentDivId).siblings()).hide();
-      $($(loadedThread)).insertAfter('#' + parentDivId);
-      hideReplyPrep();
-    });
-  } else {
-    $.get(window.location.href, function (data) {});
+function expandThread(init, link) {
+  if (!isMobile()) {
+    if (typeof link !== 'undefined') {
+      id = $(link).parent().parent().children('.parentContainer').last().children('.parentPost').last().attr('id').replace(/[^0-9]*/g, '');
+      threadurl = sitevars.boardpath + 'res/' + id + '.json';
+      console.log(threadurl);
+      expansioninprogress = $.Deferred();
+      $(link).parent().parent().children('.replyContainer').remove();
+      $.getJSON(threadurl, function (data) {
+        $(data.posts).each(function (i, item) {
+          makeReply(item, function (post) {
+            if (item.no != $(link).parent().parent().find('.parentPost').attr('id').replace(/[^0-9]*/g, '')) {
+              $(link).parent().parent().append(post);
+            }
+          });
+        });
+        $(link).parent().remove();
+        expansioninprogress.resolve();
+      });
+      $.when(expansioninprogress).then(function () {
+        doIt(1);
+      });
+    } else {
+      $('.omittedposts').each(function () {
+        $(this).html('<a class="expandthread" href="javascript:void(0)">+ ' + $(this).html().replace('Reply', 'here') + '</a>');
+      });
+      $('.thread').on('click', '.expandthread', function (e) {
+        expandThread(0, this);
+      });
+    }
   }
 }
 
@@ -767,7 +829,7 @@ function expandImage(thumbLink) {
     }
   } else {
     var thumbFname = thumbLink.href.substring(thumbLink.href.lastIndexOf("src/") + 4, thumbLink.href.lastIndexOf("src/") + 17);
-    image.src = sitevars.boardpath + "thumb/" + thumbFname + "s.jpg";
+    image.src = image.src.replace(/src\/[0-9]*\.[a-z]{3}/, 'thumb/' + thumbFname + 's.jpg');
     image.removeAttribute("style");
     dicks = 1;
     if (image.className.indexOf("opThumb") == -1) {
@@ -873,12 +935,21 @@ function updateThread() {
 
 function makeReply(data, callback) {
   var reply = document.createElement('div');
+  if (data.crossboard) {
+    data.boarddir = sitevars.boarddir.replace(sitevars.boarddir, data.crossboard);
+    data.boardpath = sitevars.boardpath.replace(sitevars.boarddir, data.crossboard);
+  } else {
+    data.boarddir = sitevars.boarddir;
+    data.boardpath = sitevars.boardpath;
+  }
   if (data.image) {
     var tnfname = data.image.substring(0, data.image.lastIndexOf(".")) + "s.jpg";
     tnfname = tnfname.replace("src/", "thumb/");
     data.tnfname = tnfname;
     if (data.filename.length > 25) {
-      data.filename = data.filename.substring(0, 25) + '(...)' + data.filename.substring(data.filename.lastIndexOf("."));
+      data.filenameabbr = data.filename.substring(0, 25) + '(...)' + data.filename.substring(data.filename.lastIndexOf("."));
+    } else {
+      data.filenameabbr = data.filename;
     }
   }
   if ((localStorage['replytemplate'] != null) && (localStorage['replytemplate_ver'] == replytemplatever)) {
@@ -960,49 +1031,18 @@ function hideThreadMobile(button, threadnum) {
 
 function birthday(birthday, play) {
   if (birthday == 0) {
-    for (var i = 0; i < document.getElementsByClassName('hat').length; i++) {
-      document.getElementsByClassName('hat')[i].innerHTML = "<img src='" + sitevars.domain + "img/partyhat.gif' style='position:absolute; margin-top:-100px;'/>"
-    }
-    document.getElementById("announcement").childNodes[1].innerHTML += "<br /><br /><a href='javascript:void(0)' onclick='birthday(1,1)'>Enable Party Hard mode</a>";
+    $('.fileinfo').before("<img src='" + sitevars.domain + "img/partyhat.gif' style='position:absolute;margin:-100px 0 0 0'/>");
+    $('#announcement').children().not('hr').last().after("<h4><a href='javascript:void(0)' onclick='birthday(1,1)'>Enable Party Hard mode</a></h4>");
   }
   if (birthday == 1) {
     if (play == 1) {
       play = 0;
       document.body.innerHTML += "<audio controls='controls' autoplay='autoplay' loop='loop'><source src='http://onlinebargainshrimptoyourdoor.com/asdf.ogg' type='audio/ogg'></audio>";
     }
+    document.body.style.background = '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
+    $('.reply').css('background', '#' + (Math.random() * 0xFFFFFF << 0).toString(16));
     window.setTimeout("birthday(1,0)", 30);
-    var index = Math.round(Math.random() * 5);
-    var ColorValue = "FFFFFF";
-    var ColorValue2 = "000000";
-    if (index == 1) {
-      ColorValue = "RED";
-      ColorValue2 = "BLUE";
-    }
-    if (index == 2) {
-      ColorValue = "PURPLE";
-      ColorValue2 = "GREEN";
-    }
-    if (index == 3) {
-      ColorValue = "BLUE";
-      ColorValue2 = "RED";
-    }
-    if (index == 4) {
-      ColorValue = "GREEN";
-      ColorValue2 = "PURPLE";
-    }
-    if (index == 5) {
-      ColorValue = "BLACK";
-      ColorValue2 = "WHITE";
-    }
-    document.body.style.background = ColorValue2;
-    for (var i = 0; i < document.getElementsByClassName('reply').length; i++) {
-      document.getElementsByClassName('reply')[i].style.background = ColorValue;
-    }
   }
-}
-
-function partyHard() {
-  birthday = 1;
 }
 
 function twitterPost(post, parent) {
