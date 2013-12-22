@@ -4,6 +4,28 @@
 		<a id="<%= this.no %>"></a>
 		<div class="replyPostInfo"><input type="checkbox" name="delete" value="<%= this.no %>" />
 			<div class="leftblock">
+			<a href="javascript:void(0)" onclick="togglePostMenu(this);"  class="postMenuButton postMenuButtonMobile" id="postMenuButton<%= this.no %>Mobile"><span></span></a>
+			   <div class="postMenu" id="postMenu<%= this.no %>Mobile">
+					<a onmouseover="closeSub(this);" href="javascript:void(0)" onclick="reportPostPopup(<%= this.no %>, '<%= sitevars.boarddir %>')" class="postMenuItem">Report this post</a>
+					<div class="hasSubMenu" onmouseover="showSub(this);">
+						<span class="postMenuItem">Delete</span>
+						<div onmouseover="$(this).addClass('focused')" class="postMenu subMenu">
+							<a class="postMenuItem" href="javascript:void(0);" onclick="deletePost(<%= this.no %>);">Post</a>
+							<a class="postMenuItem" href="javascript:void(0);" onclick="deleteImage(<%= this.no %>);">Image</a>
+						</div>
+					</div>
+					<div class="hasSubMenu" onmouseover="showSub(this);">
+						<span class="postMenuItem">Filter</span>
+						<div class="postMenu subMenu">
+							<a class="postMenuItem" href="javascript:void(0);">Not yet implemented</a>
+						</div>
+					</div>
+				  <% if(sitevars.social==1){ %>
+					<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="facebookPost(<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Facebook</a>
+					<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="twitterPost(<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Twitter</a>
+				  <% } %>
+				  <a onmouseover="closeSub(this);" href="<%= sitevars.boardpath %>res/<%= this.parent %>#<%= this.no %>" class="postMenuItem" target="_blank">Permalink</a>
+			  </div>
 				<% if(this.sub){ %><span class="replytitle"><%= this.sub %></span><% } %>
 				<% if(this.email){ %><span class="postername"><a href="<%= this.email %>"><%= this.name %></a></span><% if(this.trip){ %><span class="postertrip"><a href="<%= this.email %>"><%= this.trip %></a></span><% } %><% } %>
 				<% if(!this.email){ %><span class="postername"><%= this.name %></span><% if(this.trip){ %> <span class="postertrip"><%= this.trip %></span><% } %><% } %>

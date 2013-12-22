@@ -1,0 +1,36 @@
+<form method="post" action="<%= this.action %>" enctype="multipart/form-data" name="qrform">
+<div id="qr-form">
+<div class="qr-header">
+<strong>Quick Reply</strong>
+<div style="float:right;padding-right: 2px;">[<a class="qr-close" href="javascript:closeQuickReply()">x</a>]</div>
+</div>
+<input type="hidden" value="post" name="task">
+<input type="hidden" value="1" name="ajax">
+<% if(this.parent !== undefined) { %><input type="hidden" value="<%= this.parent %>" name="parent"> <% } %>
+<input class="postInput" type="text" name="field1" placeholder="Name">
+<input class="postInput" type="text" name="field2" placeholder="Link/Email">
+<div class="sub-row">
+<input class="postInput" type="text" name="field3" placeholder="Subject">
+<input type="submit" value="Submit" id="qrfield3s">
+</div>
+<textarea class="postInput" rows="4" name="field4" placeholder="Comment"><%= this.ref %></textarea>
+<% if(this.captcha == 1) { %>
+<div class="qr-captcha">
+<div id="qr-captcha-image">
+<%= document.getElementById('recaptcha_image').innerHTML %>
+</div>
+<%= document.getElementById('recaptcha_challenge_field').outerHTML %>
+<%= document.getElementById('recaptcha_response_field').outerHTML %>
+</div>
+<% } %>
+<label>[<input name="nofile" value="on" type="checkbox">No File]</label>
+<label>[<input name="spoiler" value="1" type="checkbox">Spoiler]</label>
+<label>[<input name="nsfw" value="1" type="checkbox">NSFW]</label> 
+<input name="file" class="qr-file" type="file">
+<% if(this.admin) { %>
+<label>[<input name="no_format" value="on" type="checkbox">HTML]</label>
+<label>[<input name="capcode" value="1" type="checkbox">Capcode]</label>
+<% } %>
+<div id="qr-error"></div>
+</div>
+</form>

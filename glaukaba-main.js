@@ -209,30 +209,31 @@ function toggleNavMenu(link, mode) {
 }
 
 function togglePostMenu(button) {
-  var menuName = $(button).attr('id');
-  menuName = menuName.replace("Button", "");
-  menuName = menuName.replace("Mobile", "");
-  var status = $("#" + menuName).css("display");
-  if ($(button).attr('id').indexOf("Mobile") != -1) {
-    var status = $("#" + menuName + "Mobile").css("display");
-  }
-  if (status == "none") {
-    if ($('.mobileParentPostInfo:visible').length > 0) {
-      $("#" + menuName + "Mobile").css("display", "block");
-      if (isMobile()) {
-        $("#" + menuName).css("display", "inline");
-        document.getElementById(menuName).style.left = 0;
-      }
-    } else {
-      document.getElementById(menuName).style.left = 0;
-      var dengus = findPos(document.getElementById($(button).attr('id')));
-      document.getElementById(menuName).style.left = dengus + "px";
-      $(button).siblings('.postMenu').css("display", "block");
+  var menuid = $(button).attr('id');
+  menuid = menuid.replace(/[^0-9]*/g, '');
+  post = $(button).parentsUntil('.post').parent();
+  
+  if(isMobile()){
+    menu = $(post).find('#postMenu' + menuid + 'Mobile');
+    if($(menu).css('display') != 'block') {
+      $(menu).css('display','block');
     }
-  } else {
-    $(".postMenu").css("display", "none");
+    else {
+       $('.postMenu').css('display','none');
+    }
+  }
+  else {
+    menu = $(post).find('#postMenu' + menuid);
+    if($(menu).css('display') != 'block') {
+      $(menu).css('display','block');
+      $(menu).css('left',findPos(button));
+    }
+    else {
+      $('.postMenu').css('display','none');
+    }
   }
 }
+
 $(document).mouseup(function (e) {
   var container = $("#overlay");
   var menus = $("div.postMenu");

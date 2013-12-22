@@ -12,9 +12,10 @@ var postsInTitle = 0;
 var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
-var replytemplatever = 8;
+var replytemplatever = 10;
+var qrtemplatever = 1;
 
-if (typeof sessionStorage['yourPosts'] != 'undefined') {
+if (sessionStorage['yourPosts'] !== undefined) {
   yourPosts = JSON.parse(sessionStorage['yourPosts']);
 }
 
@@ -143,6 +144,7 @@ function quotePreview() {
         previewOffsetY = $(post).height();
         $(post).css('top', (e.pageY - (previewOffsetY + 10)) + "px");
         $(post).css('left', (e.pageX + 50) + "px");
+        console.log('here');
       });
       if ($('#qp_reply' + quoted).length == 0)
         $('body').append(post);
@@ -150,6 +152,7 @@ function quotePreview() {
     }
   });
   $('.thread').on('mouseout', 'a.postlink, a.backlink', function () {
+	$(document).off('mousemove');
     href = $(this).attr('href');
     quoted = href.substr(href.indexOf('#') + 1);
     if ($(previewinprogress).length <= 0)
@@ -679,70 +682,89 @@ function anonymize() {
 }
 
 function recaptchaRefresh() {
-  if (hasCaptcha == 1) {
+  if (sitevars.captcha == 1) {
     Recaptcha.reload("t");
     document.getElementById("recaptcha_image").addEventListener("DOMNodeInserted", function (e) {
-      document.getElementById("qrCaptcha").innerHTML = document.getElementById("recaptchaContainer").innerHTML;
+      document.getElementById("qr-captcha-image").innerHTML = document.getElementById("recaptcha_image").innerHTML;
+      document.qrform.recaptcha_challenge_field.value = document.post_form.recaptcha_challenge_field.value;
     }, false);
   }
 }
 
 function quickReply(refLink, board) {
-  var ref = refLink.innerHTML.replace("No.", ">>");
-  var _div = document.createElement('div');
-  _div.id = "quickReply";
-  var parent;
-  var addons;
-  var uploadField = $('#uploadField');
-  if (document.getElementById("recaptchaContainer")) {
-    if (hasPass == 0) {
-      document.getElementById("recaptcha_reload_btn").href = "javascript:recaptchaRefresh();";
-      var recaptchaInsert = document.createElement('div');
-      recaptchaInsert.id = "recaptchaInsert";
-      recaptchaInsert.innerHTML = document.getElementById("recaptchaContainer").innerHTML;
-      hasCaptcha = 1;
+  var data = {};
+
+  if (document.getElementById("qr-form") == null) {
+    data.parent = $(refLink).parentsUntil("div.thread").parent()[0].firstElementChild.firstElementChild.id.replace("parent", "");
+
+    data.ref = ">>" + refLink.innerHTML.replace('No.', '') + "\n";
+    data.action = sitevars.self;
+
+    if ((sitevars.captcha !== undefined && sitevars.admin === undefined)) {
+      if (hasPass == 0) {
+        document.getElementById("recaptcha_reload_btn").href = "javascript:recaptchaRefresh();";
+        data.captcha = 1;
+      }
+    }
+
+    if (sitevars.admin !== undefined) {
+      data.admin = document.getElementsByName("admin")[0].value;
+    }
+
+    if ((localStorage['qrtemplate'] != null) && (localStorage['qrtemplate_ver'] == qrtemplatever)) {
+      $('body').jqoteapp(localStorage['qrtemplate'], data);
+
+      if (isMobile()) {
+        $("#qr-form").css('position', 'absolute');
+        $("#qr-form").css('top', window.pageYOffset);
+      } else if ($(".topNavContainer").css('display') != "none") {
+        $("#qr-form").css('margin-top', '35px');
+      }
+
+      formStuff();
     } else {
-      var recaptchaInsert = document.createElement('div');
-      recaptchaInsert.id = "recaptchaInsert";
+      $.ajax({
+        type: 'GET',
+        url: sitevars.domain + 'js/qr-template',
+        success: function (tpl) {
+          localStorage['qrtemplate_ver'] = qrtemplatever;
+          localStorage['qrtemplate'] = tpl;
+
+          $('body').jqoteapp(tpl, data);
+
+          if (isMobile()) {
+            $("#qr-form").css('position', 'absolute');
+            $("#qr-form").css('top', window.pageYOffset);
+          } else if ($(".topNavContainer").css('display') != "none") {
+            $("#qr-form").css('margin-top', '35px');
+          }
+
+          formStuff();
+        }
+      });
     }
   } else {
-    var recaptchaInsert = document.createElement('div');
-    recaptchaInsert.id = "recaptchaInsert";
-  }
-  if (document.getElementsByName("admin")[0]) {
-    var addons = '<div class="postTableContainer"><div class="postBlock">Options</div><div class="postSpacer"></div><div class="postField"><label>Self Format<input type="checkbox" name="no_format" value="1"></label> <label> Use Capcode<input type="checkbox" name="capcode" value="1"></label></div></div><input type="hidden" name="no_captcha" value="1">' + document.getElementsByName("admin")[0].outerHTML;
-  } else {
-    var addons = '';
-  }
-  parent = $(refLink).parentsUntil("div.thread").parent()[0].firstElementChild.firstElementChild.id.replace("parent", "");
-  if (document.getElementById("quickReply") == null) {
-    var margintop = $(".topNavContainer").css('display') == 'none' ? '0px' : "30px";
-    $(_div).css('margin-top', margintop);
-    document.body.appendChild(_div);
-    _div.innerHTML += '<span>Quick Reply</span><a href="javascript:void(0)" style="float: right" onclick="closeQuickReply();">[ x ]</a><form id="qrActualForm" action="/' + board + '/wakaba.pl" method="post" enctype="multipart/form-data"> <input type="hidden" name="task" value="post"> <input type="hidden" name="parent" value=' + parent + '> <input type="hidden" name="ajax" value=1> <div class="trap">Leave these fields empty (spam trap): <input type="text" name="name" autocomplete="off"><input type="text" name="link" autocomplete="off"></div> <div id="qrPostForm"> <div class="postTableContainer"> <div class="postBlock">Name</div> <div class="postSpacer"></div> <div class="postField"><input type="text" class="postInput" name="field1" id="qrField1"></div> </div> <div class="postTableContainer"> <div class="postBlock">Link</div> <div class="postSpacer"></div> <div class="postField"><input type="text" class="postInput" name="field2" id="qrField2"></div> </div> <div class="postTableContainer"> <div class="postBlock">Subject</div> <div class="postSpacer"></div> <div class="postField"> <input type="text" name="field3" class="postInput" id="qrField3"> <input type="submit" id="qrField3s" value="Submit" onclick=""> </div> </div> <div class="postTableContainer"> <div class="postBlock">Comment</div> <div class="postSpacer"></div> <div class="postField"><textarea name="field4" class="postInput" id="qrField4"></textarea></div> </div> <div class="postTableContainer" id="qrCaptcha">' + recaptchaInsert.innerHTML + '</div> <div class="postTableContainer">' + uploadField.html() + '</div> <div class="postTableContainer"> <div class="postBlock">Password</div> <div class="postSpacer"></div> <div class="postField"><input type="password" class="postInput" id="qrPassword" name="password"> (for post and file deletion)</div> </div> ' + addons + ' <div class="postTableContainer"> </div> <div id="qrErrorStatus" style="color:red"></div> </div> </form>';
-    document.getElementById("qrField4").value += ref + "\n";
-    setQrInputs("qrPostForm");
-    formStuff();
-  } else {
-    document.getElementById("qrField4").value += ref + "\n";
-  }
-  if (isMobile()) {
-    $("#quickReply").css('position', 'absolute');
-    $("#quickReply").css('top', window.pageYOffset);
+    if (document.qrform.parent.value != $(refLink).parentsUntil("div.thread").parent()[0].firstElementChild.firstElementChild.id.replace("parent", "")) {
+      closeQuickReply();
+      quickReply(refLink, board);
+    } else {
+      document.qrform.field4.value += ">>" + refLink.innerHTML.replace('No.', '') + "\n";
+      $("#qr-form").css('top', window.pageYOffset);
+    }
   }
 }
 
 function setSubmitText() {
-  document.getElementById("qrField3s").value = "Submitting...";
+  document.getElementById("qrfield3s").value = "...";
 }
 
 function formStuff() {
-  $('#qrActualForm').submit(function (e) {
+  $('#qr-form').parent().submit(function (e) {
     var form = this;
-    var action = $(this).attr('action');
+    var action = $('#post_form').attr('action');
     var formData = new FormData(this);
     e.preventDefault();
-    document.getElementById("qrField3s").value = "Submitting...";
+    setSubmitText();
     var oReq = new XMLHttpRequest();
     oReq.onload = ajaxSuccess;
     oReq.open("post", form.action, true);
@@ -757,15 +779,15 @@ function ajaxSuccess() {
     yourPost = JSON.parse(yourPost);
     yourPosts.push(yourPost);
     sessionStorage["yourPosts"] = JSON.stringify(yourPosts);
-    document.getElementById("qrErrorStatus").innerHTML = "";
+    document.getElementById("qr-error").innerHTML = "";
     closeQuickReply();
     if (hasCaptcha == 1) {
       Recaptcha.reload("t");
     }
   } else {
     $responseObj = $(data);
-    document.getElementById("qrErrorStatus").innerHTML = $responseObj.filter('#errorMessage').html();
-    document.getElementById("qrField3s").value = "Try again";
+    document.getElementById("qr-error").innerHTML = $responseObj.filter('#errorMessage').html();
+    document.getElementById("qrfield3s").value = "Submit";
     recaptchaRefresh();
   }
 }
@@ -781,14 +803,14 @@ function qrAjaxSubmit() {
 
 function showResponse(responseText, statusText, xhr, $form) {
   if (responseText.indexOf("errorMessage") == -1) {
-    document.getElementById("qrErrorStatus").innerHTML = "";
+    document.getElementById("qr-error").innerHTML = "";
     closeQuickReply();
     if (hasCaptcha == 1) {
       Recaptcha.reload("t");
     }
   } else {
-    document.getElementById("qrErrorStatus").innerHTML = "Something went wrong.";
-    document.getElementById("qrField3s").value = "Try again";
+    document.getElementById("qr-error").innerHTML = "Something went wrong.";
+    document.getElementById("qrfield3s").value = "Try again";
     recaptchaRefresh();
   }
 }
@@ -802,8 +824,7 @@ function deleteAjaxSubmit() {
 }
 
 function closeQuickReply() {
-  document.getElementById("quickReply").innerHTML = "";
-  document.body.removeChild(document.getElementById("quickReply"));
+  $('#qr-form').parent().remove();
 }
 
 function expandImage(thumbLink) {
@@ -821,7 +842,7 @@ function expandImage(thumbLink) {
       if (image.naturalWidth > pageWidth - offset) {
         var difference = image.naturalWidth - (pageWidth - offset);
         if (isMobile()) {
-          $(image).css('cssText', "width:" + ($(image).parentsUntil('.thread').parent().width() - (offset + 10)) + "px !important");
+          $(image).css('cssText', "width:" + ($(image).parentsUntil('.post').parent().width() - 20) + "px!important");
         } else {
           image.style.width = (image.naturalWidth - difference) - 100 + "px";
         }
