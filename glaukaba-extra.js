@@ -12,8 +12,8 @@ var postsInTitle = 0;
 var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
-var replytemplatever = 10;
-var qrtemplatever = 1;
+var replytemplatever = 10.2;
+var qrtemplatever = 1.2;
 
 if (sessionStorage['yourPosts'] !== undefined) {
   yourPosts = JSON.parse(sessionStorage['yourPosts']);
@@ -470,9 +470,11 @@ function markPosts() {
       "num": $(postlinks[i]).text().replace(">>", "")
     }
     for (var a = 0; a < yourPosts.length; a++) {
+		if(yourPosts[a] !== null) {
       if (jsonObject.num == yourPosts[a].num) {
         $(postlinks[i]).text($(postlinks[i]).text() + " (You)");
       }
+  }
     }
   }
 }
@@ -682,7 +684,7 @@ function anonymize() {
 }
 
 function recaptchaRefresh() {
-  if (sitevars.captcha == 1) {
+  if ((sitevars.captcha == 1) && (sitevars.admin === undefined)) {
     Recaptcha.reload("t");
     document.getElementById("recaptcha_image").addEventListener("DOMNodeInserted", function (e) {
       document.getElementById("qr-captcha-image").innerHTML = document.getElementById("recaptcha_image").innerHTML;
@@ -761,13 +763,13 @@ function setSubmitText() {
 function formStuff() {
   $('#qr-form').parent().submit(function (e) {
     var form = this;
-    var action = $('#post_form').attr('action');
+    var action = sitevars.self;
     var formData = new FormData(this);
     e.preventDefault();
     setSubmitText();
     var oReq = new XMLHttpRequest();
     oReq.onload = ajaxSuccess;
-    oReq.open("post", form.action, true);
+    oReq.open("post", action, true);
     oReq.send(new FormData(form));
   });
 }
@@ -781,7 +783,7 @@ function ajaxSuccess() {
     sessionStorage["yourPosts"] = JSON.stringify(yourPosts);
     document.getElementById("qr-error").innerHTML = "";
     closeQuickReply();
-    if (hasCaptcha == 1) {
+    if ((sitevars.captcha == 1)  && (sitevars.admin === undefined)) {
       Recaptcha.reload("t");
     }
   } else {
@@ -805,7 +807,7 @@ function showResponse(responseText, statusText, xhr, $form) {
   if (responseText.indexOf("errorMessage") == -1) {
     document.getElementById("qr-error").innerHTML = "";
     closeQuickReply();
-    if (hasCaptcha == 1) {
+    if ((sitevars.captcha == 1)  && (sitevars.admin === undefined)) {
       Recaptcha.reload("t");
     }
   } else {

@@ -28,6 +28,8 @@
 <label>[<input name="nsfw" value="1" type="checkbox">NSFW]</label> 
 <input name="file" class="qr-file" type="file">
 <% if(this.admin) { %>
+<input type="hidden" name="admin" value="<%= this.admin %>">
+<input type="hidden" value="1" name="no_captcha">
 <label>[<input name="no_format" value="on" type="checkbox">HTML]</label>
 <label>[<input name="capcode" value="1" type="checkbox">Capcode]</label>
 <% } %>
