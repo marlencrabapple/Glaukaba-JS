@@ -6,6 +6,7 @@
 </div>
 <input type="hidden" value="post" name="task">
 <input type="hidden" value="1" name="ajax">
+<input type="hidden" value="<%= this.password %>" name="password">
 <% if(this.parent !== undefined) { %><input type="hidden" value="<%= this.parent %>" name="parent"> <% } %>
 <input class="postInput" type="text" name="field1" placeholder="Name">
 <input class="postInput" type="text" name="field2" placeholder="Link/Email">

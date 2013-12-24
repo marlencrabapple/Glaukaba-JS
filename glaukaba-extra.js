@@ -13,10 +13,95 @@ var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
 var replytemplatever = 10.2;
-var qrtemplatever = 1.2;
+var qrtemplatever = 1.3;
+
+var observer = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    if (mutation.addedNodes) {
+      for (var i = 0; i < mutation.addedNodes.length; i++) {
+        var node = mutation.addedNodes[i];
+        if ($(node).hasClass('post')) {
+          if (localStorage['filters'] !== undefined) {
+            checkFiltered(node);
+          }
+        }
+      }
+    }
+  });
+});
+
+observer.observe(document, {
+  childList: true,
+  subtree: true
+});
 
 if (sessionStorage['yourPosts'] !== undefined) {
   yourPosts = JSON.parse(sessionStorage['yourPosts']);
+}
+
+function checkFiltered(post) {
+  var filters = JSON.parse(localStorage['filters']);
+
+  for (var i = 0; i < filters.length; i++) {
+    switch (filters[i].type) {
+    case "name":
+      doFilter(post, filters[i], '.postername');
+      break;
+    case "trip":
+      doFilter(post, filters[i], '.postertrip');
+      break;
+    case "subject":
+      doFilter(post, filters[i], '.replytitle');
+      break;
+    case "fname":
+      doFilter(post, filters[i], '.filename', 'title');
+      break;
+    case "md5":
+      doFilter(post, filters[i], '.thumb', 'data-md5');
+      break;
+    case "com":
+      doFilter(post, filters[i], 'blockquote');
+      break;
+    }
+  }
+}
+
+function doFilter(post, filter, selector, attrib) {
+  var matched = 0;
+  if (filter.regex == 0) {
+    if ($(post).find(selector).length > 0) {
+      if (attrib === undefined) {
+        matched = $(post).find(selector).text().indexOf(filter.val);
+      } else {
+        matched = $(post).find(selector).attr(attrib).indexOf(filter.val);
+      }
+
+      if (matched != -1) {
+        if ($(post).hasClass('reply')) {
+          hidePost(post.id, post);
+        } else {
+          toggleThread(null, post);
+        }
+      }
+    }
+  } else {
+    var regexp = new RegExp(filter.val);
+    if ($(post).find(selector).length > 0) {
+      if (attrib === undefined) {
+        matched = $(post).find(selector).text().search(regexp);
+      } else {
+        matched = $(post).find(selector).attr(attrib).search(regexp);
+      }
+
+      if (matched != -1) {
+        if ($(post).hasClass('reply')) {
+          hidePost(post.id, post);
+        } else {
+          toggleThread(null, post);
+        }
+      }
+    }
+  }
 }
 
 function isMobile() {
@@ -33,6 +118,115 @@ function toggleFeature(feature, value) {
   localStorage.setItem(feature, value);
 }
 
+function addFilter(type, postid) {
+  var filters = localStorage['filters'] === undefined ? [] : JSON.parse(localStorage['filters']);
+  var val = "";
+
+  switch (type) {
+  case "name":
+    val = $('#' + postid).find('.postername').text();
+    break;
+  case "trip":
+    val = $('#' + postid).find('.postertrip').text();
+    break;
+  case "subject":
+    val = $('#' + postid).find('.replytitle').text();
+    break;
+  case "fname":
+    val = $('#' + postid).find('.filename').attr('title');
+    break;
+  case "md5":
+    val = $('#' + postid).find('.thumb').attr('data-md5');
+    break;
+  case "com":
+    val = $('#' + postid).find('blockquote').text();
+    break;
+  }
+
+  filters.push({
+    "num": 0,
+    "type": type,
+    "val": val,
+    "regex": 0
+  });
+
+  filters[filters.length - 1].num = filters.length > 1 ? filters[filters.length - 2].num + 1 : filters[filters.length - 1].num + 1;
+  localStorage['filters'] = JSON.stringify(filters);
+  alert('Filter added.');
+}
+
+function saveFilter() {
+  if (document.addfilter.filtertype.value == 0) {
+    alert('Select a type');
+    return;
+  }
+
+  var filters = localStorage['filters'] === undefined ? [] : JSON.parse(localStorage['filters']);
+
+  if (document.addfilter.filternum.value == 0) {
+    filters.push({
+      "num": 0,
+      "type": document.addfilter.filtertype.value,
+      "val": document.addfilter.filtervalue.value,
+      "regex": document.addfilter.regex.checked
+    });
+
+    filters[filters.length - 1].num = filters.length > 1 ? filters[filters.length - 2].num + 1 : filters[filters.length - 1].num + 1;
+    $('.filter-list').append($('#filter-row-template').jqote(filters[filters.length - 1]));
+  } else {
+    for (var i = 0; i < filters.length; i++) {
+      if (filters[i].num == document.addfilter.filternum.value) {
+        filters.splice(i, 1, {
+          "num": document.addfilter.filternum.value,
+          "type": document.addfilter.filtertype.value,
+          "val": document.addfilter.filtervalue.value,
+          "regex": document.addfilter.regex.checked
+        });
+        $('tr#listRow' + document.addfilter.filternum.value).replaceWith($('#filter-row-template').jqote(filters[i]));
+        break;
+      }
+    }
+  }
+
+  $('.filter-default').remove();
+  $('.add-filter').toggle();
+  document.addfilter.reset();
+  document.addfilter.filternum.value = 0; // can't reset() hidden inputs
+  localStorage['filters'] = JSON.stringify(filters);
+}
+
+function editFilter(num) {
+  var filters = JSON.parse(localStorage['filters']);
+  var filter = {};
+
+  for (var i = 0; i < filters.length; i++) {
+    if (filters[i].num == num) {
+      filter = filters[i];
+    }
+  }
+
+  console.log(filter);
+  document.addfilter.filternum.value = filter.num;
+  document.addfilter.filtertype.value = filter.type;
+  document.addfilter.filtervalue.value = filter.val;
+  document.addfilter.regex.checked = filter.regex == true ? true : false;
+  $('.add-filter').show();
+}
+
+function removeFilter(num) {
+  var filters = JSON.parse(localStorage['filters']);
+
+  for (var i = 0; i < filters.length; i++) {
+    if (filters[i].num == num) {
+      filters.splice(i, 1);
+      break;
+    }
+  }
+
+  localStorage['filters'] = JSON.stringify(filters);
+  $('tr#listRow' + num).remove();
+}
+
 function loadSavedSettings() {
   for (var i = 0; i < settings.length; i++) {
     if ($('#' + settings[i]).is('input')) {
@@ -45,8 +239,16 @@ function loadSavedSettings() {
       document.getElementById(settings[i]).value = localStorage.getItem(settings[i]);
     }
   }
-  if ((localStorage.getItem('reverseImgSearchLinks') == null) || (localStorage.getItem('reverseImgSearchLinks') == ''))
+  if ((localStorage.getItem('reverseImgSearchLinks') == null) || (localStorage.getItem('reverseImgSearchLinks') == '')) {
     $('#reverseImgSearchLinks').val("# Remove the hash sign from the services you'd like to use.\n\n# reverse image search\n#//www.google.com/searchbyimage?image_url=%tn\n#//tineye.com/search?url=%tn\n#//3d.iqdb.org/?url=%tn\n#//regex.info/exif.cgi?imgurl=%img\n\n# uploaders:\n#//imgur.com/upload?url=%img\n#//ompldr.org/upload?url1=%img");
+  }
+
+  if (localStorage['filters'] !== undefined) {
+    $('.filter-default').remove();
+    $(JSON.parse(localStorage['filters'])).each(function (i, filter) {
+      $('.filter-list').append($('#filter-row-template').jqote(filter));
+    });
+  }
 }
 
 function imgExpPrep() {
@@ -144,7 +346,6 @@ function quotePreview() {
         previewOffsetY = $(post).height();
         $(post).css('top', (e.pageY - (previewOffsetY + 10)) + "px");
         $(post).css('left', (e.pageX + 50) + "px");
-        console.log('here');
       });
       if ($('#qp_reply' + quoted).length == 0)
         $('body').append(post);
@@ -152,7 +353,7 @@ function quotePreview() {
     }
   });
   $('.thread').on('mouseout', 'a.postlink, a.backlink', function () {
-	$(document).off('mousemove');
+    $(document).off('mousemove');
     href = $(this).attr('href');
     quoted = href.substr(href.indexOf('#') + 1);
     if ($(previewinprogress).length <= 0)
@@ -335,6 +536,7 @@ function hideReplyPrep() {
   });
   doubledashes.each(function (e) {
     if (localStorage.getItem(this.nextElementSibling.id + "Hidden") == 'true') {
+      console.log(localStorage.getItem(this.nextElementSibling.id + "Hidden"));
       hidePost(this.nextElementSibling.id)
     }
   });
@@ -442,22 +644,36 @@ function expandFilename(filename, mode) {
   }
 }
 
-function toggleThread(button) {
-  var thread = $(button).parentsUntil('.thread').last().parent();
-  var op = $(thread).children('.parentContainer').children('.parentPost');
-  var opid = $(op).attr('id');
-  if ($(button).attr('class').indexOf('revealThreadButton') == -1) {
-    var poststub = "<a class='hidePostButton revealThreadButton' id='threadHidden" + opid + "' href='javascript:void(0)'>[ + ] Thread Hidden</a>";
+function toggleThread(button, firstpost) {
+  if (firstpost === undefined) {
+    var thread = $(button).parentsUntil('.thread').last().parent();
+    var op = $(thread).children('.parentContainer').children('.parentPost');
+    var opid = $(op).attr('id');
+    if ($(button).attr('class').indexOf('revealThreadButton') == -1) {
+      var poststub = "<a class='hidePostButton revealThreadButton' id='threadHidden" + opid + "' href='javascript:void(0)'>[ + ] Thread Hidden</a>";
+      $(thread).children('.replyContainer, .parentContainer, .omittedposts').css('display', 'none');
+      $(thread).append(poststub);
+      localStorage["threadHidden" + opid] = true;
+      $('.revealThreadButton').on('click', function () {
+        thread = $(this).parent();
+        op = $(thread).children('.parentContainer').children('.parentPost');
+        opid = $(op).attr('id');
+        $('#threadHidden' + opid).remove();
+        $(thread).children('.replyContainer, .parentContainer, .omittedposts').css('display', 'block');
+        localStorage.removeItem("threadHidden" + opid);
+      });
+    }
+  } else {
+    var thread = firstpost.parentElement.parentElement;
+    var poststub = "<a class='hidePostButton revealThreadButton' id='threadHidden" + firstpost.id + "' href='javascript:void(0)'>[ + ] Thread Hidden</a>";
     $(thread).children('.replyContainer, .parentContainer, .omittedposts').css('display', 'none');
     $(thread).append(poststub);
-    localStorage["threadHidden" + opid] = true;
     $('.revealThreadButton').on('click', function () {
       thread = $(this).parent();
       op = $(thread).children('.parentContainer').children('.parentPost');
       opid = $(op).attr('id');
       $('#threadHidden' + opid).remove();
       $(thread).children('.replyContainer, .parentContainer, .omittedposts').css('display', 'block');
-      localStorage.removeItem("threadHidden" + opid);
     });
   }
 }
@@ -470,11 +686,11 @@ function markPosts() {
       "num": $(postlinks[i]).text().replace(">>", "")
     }
     for (var a = 0; a < yourPosts.length; a++) {
-		if(yourPosts[a] !== null) {
-      if (jsonObject.num == yourPosts[a].num) {
-        $(postlinks[i]).text($(postlinks[i]).text() + " (You)");
+      if (yourPosts[a] !== null) {
+        if (jsonObject.num == yourPosts[a].num) {
+          $(postlinks[i]).text($(postlinks[i]).text() + " (You)");
+        }
       }
-  }
     }
   }
 }
@@ -701,6 +917,7 @@ function quickReply(refLink, board) {
 
     data.ref = ">>" + refLink.innerHTML.replace('No.', '') + "\n";
     data.action = sitevars.self;
+    data.password = document.getElementById('delPass').value;
 
     if ((sitevars.captcha !== undefined && sitevars.admin === undefined)) {
       if (hasPass == 0) {
@@ -751,7 +968,9 @@ function quickReply(refLink, board) {
       quickReply(refLink, board);
     } else {
       document.qrform.field4.value += ">>" + refLink.innerHTML.replace('No.', '') + "\n";
-      $("#qr-form").css('top', window.pageYOffset);
+      if (isMobile()) {
+        $("#qr-form").css('top', window.pageYOffset);
+      }
     }
   }
 }
@@ -783,7 +1002,7 @@ function ajaxSuccess() {
     sessionStorage["yourPosts"] = JSON.stringify(yourPosts);
     document.getElementById("qr-error").innerHTML = "";
     closeQuickReply();
-    if ((sitevars.captcha == 1)  && (sitevars.admin === undefined)) {
+    if ((sitevars.captcha == 1) && (sitevars.admin === undefined)) {
       Recaptcha.reload("t");
     }
   } else {
@@ -807,7 +1026,7 @@ function showResponse(responseText, statusText, xhr, $form) {
   if (responseText.indexOf("errorMessage") == -1) {
     document.getElementById("qr-error").innerHTML = "";
     closeQuickReply();
-    if ((sitevars.captcha == 1)  && (sitevars.admin === undefined)) {
+    if ((sitevars.captcha == 1) && (sitevars.admin === undefined)) {
       Recaptcha.reload("t");
     }
   } else {
@@ -994,26 +1213,40 @@ function makeReply(data, callback) {
   }
 }
 
-function hidePost(replyDivId) {
+function hidePost(replyDivId, replyDiv) {
   var dengus = document.createElement("div");
   dengus.innerHTML = "Post Hidden";
   dengus.setAttribute("id", "postStub" + replyDivId.substring(5));
   $(dengus).css('display', 'inline');
-  if ((document.getElementById(replyDivId).style.display == "inline-block") || (document.getElementById(replyDivId).style.display == "")) {
-    document.getElementById(replyDivId).style.display = "none";
-    document.getElementById("replyContainer" + replyDivId.substring(5)).appendChild(dengus);
-    document.getElementById(replyDivId).previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ + ]</a>";
-    localStorage.setItem(replyDivId + "Hidden", "true");
+
+  if (replyDiv === undefined) {
+    if ((document.getElementById(replyDivId).style.display == "inline-block") || (document.getElementById(replyDivId).style.display == "")) {
+      document.getElementById(replyDivId).style.display = "none";
+      document.getElementById("replyContainer" + replyDivId.substring(5)).appendChild(dengus);
+      document.getElementById(replyDivId).previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ + ]</a>";
+      localStorage.setItem(replyDivId + "Hidden", "true");
+    } else {
+      document.getElementById(replyDivId).style.display = "inline-block";
+      document.getElementById(replyDivId).previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ - ]</a>";
+      document.getElementById("replyContainer" + replyDivId.substring(5)).removeChild(document.getElementById("postStub" + replyDivId.substring(5)));
+      localStorage.removeItem(replyDivId + "Hidden");
+    }
   } else {
-    document.getElementById(replyDivId).style.display = "inline-block";
-    document.getElementById(replyDivId).previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ - ]</a>";
-    document.getElementById("replyContainer" + replyDivId.substring(5)).removeChild(document.getElementById("postStub" + replyDivId.substring(5)));
-    localStorage.removeItem(replyDivId + "Hidden");
+    if (replyDiv.style.display == "inline-block" || replyDiv.style.display == "") {
+      replyDiv.style.display = "none";
+      replyDiv.parentElement.appendChild(dengus);
+      replyDiv.previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ + ]</a>";
+      //localStorage.setItem(replyDiv.id + "Hidden", "true");
+    } else {
+      replyDiv.style.display = "inline-block";
+      replyDiv.previousElementSibling.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ - ]</a>";
+      replyDiv.parentElement.removeChild(document.getElementById("postStub" + replyDiv.id.substring(5)));
+      //localStorage.removeItem(replyDiv.id + "Hidden");
+    }
   }
 }
 
 function hideThread(thread, parentPost, filesize) {
-  console.log(thread);
   var dengus = document.createElement("div");
   dengus.innerHTML = "<a class='hidePostButton' href='javascript:void(0)'>[ + ]</a> Thread Hidden";
   dengus.setAttribute("id", "postStub" + $(parentPost).attr('id').substring(6));

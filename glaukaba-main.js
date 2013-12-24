@@ -1,3 +1,84 @@
+! function (r, t) {
+  "use strict";
+  var d = t.support.touch = !! ("ontouchstart" in window || window.DocumentTouch && r instanceof DocumentTouch),
+    e = "._tap",
+    i = "tap",
+    f = 40,
+    l = 400,
+    a = "clientX clientY screenX screenY pageX pageY".split(" "),
+    s = function (n, e) {
+      var c;
+      return c = Array.prototype.indexOf ? n.indexOf(e) : t.inArray(e, n)
+    }, n = {
+      $el: null,
+      x: 0,
+      y: 0,
+      count: 0,
+      cancel: !1,
+      start: 0
+    }, u = function (o, i) {
+      var n = i.originalEvent,
+        c = t.Event(n),
+        r = n.changedTouches ? n.changedTouches[0] : n;
+      c.type = o;
+      for (var e = 0, u = a.length; u > e; e++) c[a[e]] = r[a[e]];
+      return c
+    }, g = function (t) {
+      var o = t.originalEvent,
+        e = t.changedTouches ? t.changedTouches[0] : o.changedTouches[0],
+        i = Math.abs(e.pageX - n.x),
+        a = Math.abs(e.pageY - n.y),
+        r = Math.max(i, a);
+      return Date.now() - n.start < l && f > r && !n.cancel && 1 === n.count && c.isTracking
+    }, c = {
+      isEnabled: !1,
+      isTracking: !1,
+      enable: function () {
+        return this.isEnabled ? this : (this.isEnabled = !0, t(r.body).on("touchstart" + e, this.onTouchStart).on("touchend" + e, this.onTouchEnd).on("touchcancel" + e, this.onTouchCancel), this)
+      },
+      disable: function () {
+        return this.isEnabled ? (this.isEnabled = !1, t(r.body).off("touchstart" + e, this.onTouchStart).off("touchend" + e, this.onTouchEnd).off("touchcancel" + e, this.onTouchCancel), this) : this
+      },
+      onTouchStart: function (e) {
+        var o = e.originalEvent.touches;
+        if (n.count = o.length, !c.isTracking) {
+          c.isTracking = !0;
+          var i = o[0];
+          n.cancel = !1, n.start = Date.now(), n.$el = t(e.target), n.x = i.pageX, n.y = i.pageY
+        }
+      },
+      onTouchEnd: function (t) {
+        g(t) && n.$el.trigger(u(i, t)), c.onTouchCancel(t)
+      },
+      onTouchCancel: function () {
+        c.isTracking = !1, n.cancel = !0
+      }
+    };
+  if (t.event.special[i] = {
+    setup: function () {
+      c.enable()
+    }
+  }, !d) {
+    var o = [],
+      h = function (n) {
+        var e = n.originalEvent;
+        if (!(n.isTrigger || s(o, e) >= 0)) {
+          o.length > 3 && o.splice(0, o.length - 3), o.push(e);
+          var c = u(i, n);
+          t(n.target).trigger(c)
+        }
+      };
+    t.event.special[i] = {
+      setup: function () {
+        t(this).on("click" + e, h)
+      },
+      teardown: function () {
+        t(this).off("click" + e, h)
+      }
+    }
+  }
+}(document, jQuery);
+
 var openMenu;
 var hasPass = 0;
 
@@ -142,7 +223,6 @@ function set_delpass(id) {
 function setPostInputs() {
   document.getElementById("field1").value = get_cookie("name");
   document.getElementById("field2").value = get_cookie("email");
-  document.getElementById("password").value = get_password("password");
 }
 
 function setDelPass() {
@@ -183,10 +263,30 @@ window.onload = function (e) {
       }
     }
   }
+  $('.thread').on('tap', '.post, .post > blockquote', function (event) {
+    if (isMobile()) {
+      if ($(this).hasClass('post') && (event.target == this)) {
+        $(this).parent().children('.mobile-post-menu').toggle();
+      } else if (event.target.nodeName == "BLOCKQUOTE") {
+        $(this).parent().parent().children('.mobile-post-menu').toggle();
+      }
+    }
+  });
+  $('.mobile-post-menu').on('tap', '.filter-button', function () {
+    $(this).parent().children('.mobile-delete-menu').hide()
+    $(this).parent().children('.mobile-filter-menu').toggle();
+  });
+  $('.mobile-post-menu').on('tap', '.delete-button', function () {
+    $(this).parent().children('.mobile-filter-menu').hide();
+    $(this).parent().children('.mobile-delete-menu').toggle();
+  });
+  $('.pass-field').val(get_password("password"));
+
   doIt();
   prettyPrint();
   hide_captcha();
 }
+
 if (style_cookie) {
   var cookie = get_cookie(style_cookie);
   var title = cookie ? cookie : get_preferred_stylesheet();
@@ -202,34 +302,37 @@ function toggleNavMenu(link, mode) {
     document.getElementById("overlay").style.display = "block";
     $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,1);">Board Options</a>';
     loadSavedSettings();
+    setTab(1);
   } else {
     document.getElementById("overlay").style.display = "none";
     $('.topNavRight').children('a').outerHTML = '<a href="javascript:void(0)" onclick="toggleNavMenu(this,0);">Board Options</a>';
   }
 }
 
+function setTab(page) {
+  $('.optionspage').hide();
+  $('#optionspage' + page).show();
+}
+
 function togglePostMenu(button) {
   var menuid = $(button).attr('id');
   menuid = menuid.replace(/[^0-9]*/g, '');
   post = $(button).parentsUntil('.post').parent();
-  
-  if(isMobile()){
+
+  if (isMobile()) {
     menu = $(post).find('#postMenu' + menuid + 'Mobile');
-    if($(menu).css('display') != 'block') {
-      $(menu).css('display','block');
+    if ($(menu).css('display') != 'block') {
+      $(menu).css('display', 'block');
+    } else {
+      $('.postMenu').css('display', 'none');
     }
-    else {
-       $('.postMenu').css('display','none');
-    }
-  }
-  else {
+  } else {
     menu = $(post).find('#postMenu' + menuid);
-    if($(menu).css('display') != 'block') {
-      $(menu).css('display','block');
-      $(menu).css('left',findPos(button));
-    }
-    else {
-      $('.postMenu').css('display','none');
+    if ($(menu).css('display') != 'block') {
+      $(menu).css('display', 'block');
+      $(menu).css('left', findPos(button));
+    } else {
+      $('.postMenu').css('display', 'none');
     }
   }
 }
@@ -308,14 +411,21 @@ function closeSub(menu) {
   }
 }
 
-function deletePost(postNumber) {
+function deletePost(num, fileonly) {
   var board = sitevars.boarddir;
-  window.location = sitevars.boardpath + "wakaba.pl?task=delete&delete=" + postNumber + "&password=" + document.getElementById("delPass").value;
-}
-
-function deleteImage(postNumber) {
-  var board = sitevars.boarddir;
-  window.location = sitevars.boardpath + "wakaba.pl?task=delete&delete=" + postNumber + "&fileonly=1&password=" + document.getElementById("delPass").value;
+  fileonly = fileonly == 1 ? "&fileonly=1" : "";
+  var deletionurl = isMobile() ? sitevars.boardpath + "wakaba.pl?task=delete&delete=" + num + "&password=" + $('#mobile-delpass-' + num).val() + fileonly : sitevars.boardpath + "wakaba.pl?task=delete&delete=" + num + "&password=" + $('#delPass').val() + fileonly;
+  $.ajax({
+    type: 'GET',
+    url: deletionurl,
+    success: function (data) {
+      if ($(data).filter('#errorMessage').length > 0) {
+        alert($(data).filter('#errorMessage').text());
+      } else {
+        alert("Post deleted.");
+      }
+    }
+  });
 }
 
 function togglePostForm() {
