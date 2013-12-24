@@ -735,6 +735,13 @@ function doIt(again) {
   }
   if ($('body').attr('class')) {
     if (!again) {
+      if (/WebKit/.test(navigator.userAgent) == false) {
+        $('.post').each(function (i, v) {
+          if (localStorage['filters'] !== undefined) {
+            checkFiltered(v);
+          }
+        });
+      }
       if (localStorage.getItem('qRep') == 'true') {
         qrPrep();
       }
