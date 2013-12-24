@@ -151,7 +151,7 @@ function addFilter(type, postid) {
   filters.push({
     "num": 0,
     "type": type,
-    "val": val,
+    "val": $.trim(val),
     "regex": 0
   });
 
@@ -172,7 +172,7 @@ function saveFilter() {
     filters.push({
       "num": 0,
       "type": document.addfilter.filtertype.value,
-      "val": document.addfilter.filtervalue.value,
+      "val": $.trim(document.addfilter.filtervalue.value),
       "regex": document.addfilter.regex.checked
     });
 
@@ -184,7 +184,7 @@ function saveFilter() {
         filters.splice(i, 1, {
           "num": document.addfilter.filternum.value,
           "type": document.addfilter.filtertype.value,
-          "val": document.addfilter.filtervalue.value,
+          "val": $.trim(document.addfilter.filtervalue.value),
           "regex": document.addfilter.regex.checked
         });
         $('tr#listRow' + document.addfilter.filternum.value).replaceWith($('#filter-row-template').jqote(filters[i]));
