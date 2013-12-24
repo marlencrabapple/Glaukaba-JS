@@ -24,6 +24,11 @@ var observer = new MutationObserver(function (mutations) {
           if (localStorage['filters'] !== undefined) {
             checkFiltered(node);
           }
+        } else if ((sitevars.captcha == 1) && (sitevars.admin === undefined) && (document.qrform !== undefined)) {
+          if (node.id == 'recaptcha_challenge_field') {
+            document.getElementById('qr-captcha-image').innerHTML = document.getElementById('recaptcha_image').innerHTML;
+            document.qrform.recaptcha_challenge_field.value = document.post_form.recaptcha_challenge_field.value;
+          }
         }
       }
     }
@@ -899,16 +904,6 @@ function anonymize() {
   }
 }
 
-function recaptchaRefresh() {
-  if ((sitevars.captcha == 1) && (sitevars.admin === undefined)) {
-    Recaptcha.reload("t");
-    document.getElementById("recaptcha_image").addEventListener("DOMNodeInserted", function (e) {
-      document.getElementById("qr-captcha-image").innerHTML = document.getElementById("recaptcha_image").innerHTML;
-      document.qrform.recaptcha_challenge_field.value = document.post_form.recaptcha_challenge_field.value;
-    }, false);
-  }
-}
-
 function quickReply(refLink, board) {
   var data = {};
 
@@ -921,7 +916,6 @@ function quickReply(refLink, board) {
 
     if ((sitevars.captcha !== undefined && sitevars.admin === undefined)) {
       if (hasPass == 0) {
-        document.getElementById("recaptcha_reload_btn").href = "javascript:recaptchaRefresh();";
         data.captcha = 1;
       }
     }
@@ -1009,7 +1003,6 @@ function ajaxSuccess() {
     $responseObj = $(data);
     document.getElementById("qr-error").innerHTML = $responseObj.filter('#errorMessage').html();
     document.getElementById("qrfield3s").value = "Submit";
-    recaptchaRefresh();
   }
 }
 
@@ -1032,7 +1025,6 @@ function showResponse(responseText, statusText, xhr, $form) {
   } else {
     document.getElementById("qr-error").innerHTML = "Something went wrong.";
     document.getElementById("qrfield3s").value = "Try again";
-    recaptchaRefresh();
   }
 }
 
