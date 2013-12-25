@@ -855,7 +855,7 @@ function embedMedia() {
       $(v).on('click', function (e) {
         e.preventDefault();
         if ($(v).next('.embed').length == 0) {
-          var id = v.href.match(/(?:\?watch\=|\.be\/)(.{11})/);
+          var id = v.href.match(/(?:\/watch\?v\=|\.be\/)(.{11})/);
           $(v).after('<div class="embed"><iframe width="560" height="315" src="//www.youtube.com/embed/' + id[1] + '" frameborder="0" allowfullscreen></iframe></div>');
         } else {
           $(v).next('.embed').remove();
