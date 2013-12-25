@@ -6,7 +6,7 @@ var modified;
 var newPosts;
 var postsAdded = 0;
 var numberOfPosts = 0;
-var settings = ['qRep', 'inlineExpansion', 'threadUpdater', 'quotePreview', 'replyHiding', 'threadHiding', 'anonymize', 'inlineQuote', 'expandPosts', 'expandThreads', 'replyBacklinking', 'expandFilename', 'fixedNav', 'markPosts', 'reverseImgSearch', 'reverseImgSearchLinks'];
+var settings = ['qRep', 'inlineExpansion', 'threadUpdater', 'quotePreview', 'replyHiding', 'threadHiding', 'anonymize', 'inlineQuote', 'expandPosts', 'expandThreads', 'replyBacklinking', 'expandFilename', 'fixedNav', 'markPosts', 'reverseImgSearch', 'reverseImgSearchLinks', 'embedMedia'];
 var hasCaptcha = 0;
 var postsInTitle = 0;
 var finalDivScrollPos;
@@ -167,7 +167,7 @@ function saveFilter() {
   }
 
   var filters = localStorage['filters'] === undefined ? [] : JSON.parse(localStorage['filters']);
-
+  fixedNav
   if (document.addfilter.filternum.value == 0) {
     filters.push({
       "num": 0,
@@ -771,6 +771,10 @@ function doIt(again) {
       }
       highlightPosts();
     }
+
+    if (localStorage.getItem('embedMedia') == 'true') {
+      embedMedia();
+    }
     if (localStorage.getItem('markPosts') == 'true') {
       markPosts();
     }
@@ -840,6 +844,24 @@ function makeReverseSearchLinks() {
         }
       }
     });
+  });
+}
+
+function embedMedia() {
+  var links = [];
+  var re = /^(?:www\.)?youtu(?:be)?\.[a-z.]{2,6}$/;
+  $('blockquote').find('a').not('postlink').each(function (i, v) {
+    if (re.test(v.host)) {
+      $(v).on('click', function (e) {
+        e.preventDefault();
+        if ($(v).next('.embed').length == 0) {
+          var id = v.href.match(/(?:\?watch\=|\.be\/)(.{11})/);
+          $(v).after('<div class="embed"><iframe width="560" height="315" src="//www.youtube.com/embed/' + id[1] + '" frameborder="0" allowfullscreen></iframe></div>');
+        } else {
+          $(v).next('.embed').remove();
+        }
+      });
+    }
   });
 }
 
