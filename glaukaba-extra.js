@@ -788,15 +788,29 @@ function doIt(again) {
 
             if (isMobile()) {
               if (i == 1) {
-                $('#tooltiparrow' + i).css('top', $(v).offset().top + $(v).height() + 15 + 'px');
-                $('#tooltip' + i).css('top', $(v).offset().top + $(v).height() + 20 + 'px');
+                $('#tooltiparrow' + i).css('top', $(v).offset().top + $(v).height() + 10 + 'px');
+                $('#tooltip' + i).css('top', $(v).offset().top + $(v).height() + 15 + 'px');
               }
+              $('#tooltip' + i).css('right', $(window).width() - $(v).offset().left - $(v).width() + 'px');
+              $('#tooltiparrow' + i).css('left', ($(v).offset().left + $(v).width() / 2.5) + 'px');
               $('.tooltip').css('z-index', 0);
               $('#tooltip' + i).addClass('mobile');
               $('#tooltiparrow' + i).addClass('mobile');
             }
           }
         });
+
+        if (isMobile()) {
+          $('body').append('<div id="tooltippost" class="tooltip" style="z-index:9002;font-weight:bold;position:absolute;background:#65b1eb;color:#444;border-radius:2px;padding:10px 15px">Try tapping on a post for additional options.</div>');
+          $('body').append('<div id="tooltiparrowpost" class="tooltip" style="z-index:9002;position:absolute;width:0;height:0;border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid #65b1eb;"></div>');
+          $('#tooltippost').css('left', '50%');
+          $('#tooltippost').css('width', '250px');
+          $('#tooltippost').css('margin-left', '-140px');
+          $('#tooltippost').css('top', $('.mobilePostReplyLink').first().offset().top + $('.mobilePostReplyLink').first().height() + 10 + 'px');
+
+          $('#tooltiparrowpost').css('left', '50%');
+          $('#tooltiparrowpost').css('top', $('.mobilePostReplyLink').first().offset().top + $('.mobilePostReplyLink').first().height() + 5 + 'px');
+        }
       }
 
       highlightPosts();
@@ -887,6 +901,10 @@ function embedMedia() {
         if ($(v).next('.embed').length == 0) {
           var id = v.href.match(/(?:\/watch\?v\=|\.be\/)(.{11})/);
           $(v).after('<div class="embed"><iframe width="560" height="315" src="//www.youtube.com/embed/' + id[1] + '" frameborder="0" allowfullscreen></iframe></div>');
+          if (isMobile()) {
+            $('.embed').children('iframe').attr('height', '');
+            $('.embed').children('iframe').width($('.embed').parentsUntil('.post').parent().width() - $('.embed').offset().left - 5);
+          }
         } else {
           $(v).next('.embed').remove();
         }
