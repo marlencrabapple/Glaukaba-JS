@@ -121,6 +121,9 @@ function setQrInputs() {
 
 function toggleFeature(feature, value) {
   localStorage.setItem(feature, value);
+  if (localStorage['showtooltip'] === undefined) {
+    localStorage['showtooltip'] = 0;
+  }
 }
 
 function addFilter(type, postid) {
@@ -253,6 +256,8 @@ function loadSavedSettings() {
       $('.filter-list').append($('#filter-row-template').jqote(filter));
     });
   }
+
+  $('.tooltip').hide();
 }
 
 function imgExpPrep() {
@@ -768,6 +773,32 @@ function doIt(again) {
       if (localStorage.getItem('threadHiding') == 'true') {
         hideThreadPrep();
       }
+
+      if (localStorage['showtooltip'] === undefined) {
+        $('a[onclick="toggleNavMenu(this,0);"]').each(function (i, v) {
+          if ($(v).is(':visible')) {
+            $('body').append('<div id="tooltip' + i + '" class="tooltip" style="z-index:9002;font-weight:bold;position:absolute;background:#65b1eb;color:#444;border-radius:2px;padding:10px 15px;right:0">Change your settings.</div>');
+            $('body').append('<div id="tooltiparrow' + i + '" class="tooltip" style="z-index:9002;position:absolute;width:0;height:0;border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid #65b1eb;"></div>');
+            $('#tooltip' + i).css('right', $(window).width() - $(v).offset().left - $(v).width() - 5 + 'px');
+            $('#tooltip' + i).css('top', $(v).offset().top + $(v).height() + 10 + 'px');
+
+            $('#tooltiparrow' + i).css('left', ($(v).offset().left + $(v).width() / 2) + 'px');
+            $('#tooltiparrow' + i).css('top', $(v).offset().top + $(v).height() + 5 + 'px');
+            $('.footer').css('margin-bottom', '15px');
+
+            if (isMobile()) {
+              if (i == 1) {
+                $('#tooltiparrow' + i).css('top', $(v).offset().top + $(v).height() + 15 + 'px');
+                $('#tooltip' + i).css('top', $(v).offset().top + $(v).height() + 20 + 'px');
+              }
+              $('.tooltip').css('z-index', 0);
+              $('#tooltip' + i).addClass('mobile');
+              $('#tooltiparrow' + i).addClass('mobile');
+            }
+          }
+        });
+      }
+
       highlightPosts();
     }
 
