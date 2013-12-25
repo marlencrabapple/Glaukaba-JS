@@ -167,7 +167,6 @@ function saveFilter() {
   }
 
   var filters = localStorage['filters'] === undefined ? [] : JSON.parse(localStorage['filters']);
-  fixedNav
   if (document.addfilter.filternum.value == 0) {
     filters.push({
       "num": 0,
