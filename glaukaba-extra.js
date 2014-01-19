@@ -12,8 +12,8 @@ var postsInTitle = 0;
 var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
-var replytemplatever = 10.2;
-var qrtemplatever = 1.3;
+var replytemplatever = 11.2;
+var qrtemplatever = 1.4;
 
 var observer = new MutationObserver(function (mutations) {
   mutations.forEach(function (mutation) {
@@ -121,8 +121,8 @@ function setQrInputs() {
 
 function toggleFeature(feature, value) {
   localStorage.setItem(feature, value);
-  if (localStorage['showtooltip'] === undefined) {
-    localStorage['showtooltip'] = 0;
+  if(localStorage['showtooltip'] === undefined) {
+	  localStorage['showtooltip'] = 0;
   }
 }
 
@@ -256,7 +256,7 @@ function loadSavedSettings() {
       $('.filter-list').append($('#filter-row-template').jqote(filter));
     });
   }
-
+  
   $('.tooltip').hide();
 }
 
@@ -722,8 +722,8 @@ function titleFactory(mode) {
         postsInTitle = 0;
         document.title = "(" + postsInTitle + ") " + $(".parentPost").children('blockquote').first().text();
         $('.unreadMarker').css('box-shadow', '');
-        $('.reply.newPost').attr('class', 'reply');
-        $('.reply.unreadMarker').attr('class', 'reply');
+        $('.reply.newPost').attr('class', 'reply post');
+        $('.reply.unreadMarker').attr('class', 'reply post');
         $('.reply.newPost.highlight').attr('class', 'reply highlight');
       }
     }
@@ -739,13 +739,13 @@ function doIt(again) {
   }
   if ($('body').attr('class')) {
     if (!again) {
-      if (/WebKit/.test(navigator.userAgent) == false) {
-        $('.post').each(function (i, v) {
-          if (localStorage['filters'] !== undefined) {
-            checkFiltered(v);
-          }
-        });
-      }
+		if(/WebKit/.test(navigator.userAgent) == false) {
+			$('.post').each(function(i,v) {
+				if (localStorage['filters'] !== undefined) {
+					checkFiltered(v);
+				}
+			});
+		}
       if (localStorage.getItem('qRep') == 'true') {
         qrPrep();
       }
@@ -773,52 +773,80 @@ function doIt(again) {
       if (localStorage.getItem('threadHiding') == 'true') {
         hideThreadPrep();
       }
-
-      if (localStorage['showtooltip'] === undefined) {
-        $('a[onclick="toggleNavMenu(this,0);"]').each(function (i, v) {
-          if ($(v).is(':visible')) {
-            $('body').append('<div id="tooltip' + i + '" class="tooltip" style="z-index:9002;font-weight:bold;position:absolute;background:#65b1eb;color:#444;border-radius:2px;padding:10px 15px;right:0">Change your settings.</div>');
-            $('body').append('<div id="tooltiparrow' + i + '" class="tooltip" style="z-index:9002;position:absolute;width:0;height:0;border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid #65b1eb;"></div>');
-            $('#tooltip' + i).css('right', $(window).width() - $(v).offset().left - $(v).width() - 5 + 'px');
-            $('#tooltip' + i).css('top', $(v).offset().top + $(v).height() + 10 + 'px');
-
-            $('#tooltiparrow' + i).css('left', ($(v).offset().left + $(v).width() / 2) + 'px');
-            $('#tooltiparrow' + i).css('top', $(v).offset().top + $(v).height() + 5 + 'px');
-            $('.footer').css('margin-bottom', '15px');
-
-            if (isMobile()) {
-              if (i == 1) {
-                $('#tooltiparrow' + i).css('top', $(v).offset().top + $(v).height() + 10 + 'px');
-                $('#tooltip' + i).css('top', $(v).offset().top + $(v).height() + 15 + 'px');
-              }
-              $('#tooltip' + i).css('right', $(window).width() - $(v).offset().left - $(v).width() + 'px');
-              $('#tooltiparrow' + i).css('left', ($(v).offset().left + $(v).width() / 2.5) + 'px');
-              $('.tooltip').css('z-index', 0);
-              $('#tooltip' + i).addClass('mobile');
-              $('#tooltiparrow' + i).addClass('mobile');
-            }
-          }
-        });
-
-        if (isMobile()) {
-          $('body').append('<div id="tooltippost" class="tooltip" style="z-index:9002;font-weight:bold;position:absolute;background:#65b1eb;color:#444;border-radius:2px;padding:10px 15px">Try tapping on a post for additional options.</div>');
-          $('body').append('<div id="tooltiparrowpost" class="tooltip" style="z-index:9002;position:absolute;width:0;height:0;border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid #65b1eb;"></div>');
-          $('#tooltippost').css('left', '50%');
-          $('#tooltippost').css('width', '250px');
-          $('#tooltippost').css('margin-left', '-140px');
-          $('#tooltippost').css('top', $('.mobilePostReplyLink').first().offset().top + $('.mobilePostReplyLink').first().height() + 10 + 'px');
-
-          $('#tooltiparrowpost').css('left', '50%');
-          $('#tooltiparrowpost').css('top', $('.mobilePostReplyLink').first().offset().top + $('.mobilePostReplyLink').first().height() + 5 + 'px');
-        }
-      }
-
+      
+      if(localStorage['showtooltip'] === undefined) {
+		  $('a[onclick="toggleNavMenu(this,0);"]').each(function(i,v) {
+			  if($(v).is(':visible')) {
+				  $('body').append('<div id="tooltip' + i + '" class="tooltip" style="z-index:9002;font-weight:bold;position:absolute;background:#65b1eb;color:#444;border-radius:2px;padding:10px 15px;right:0">Change your settings.</div>');
+				  $('body').append('<div id="tooltiparrow' + i + '" class="tooltip" style="z-index:9002;position:absolute;width:0;height:0;border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid #65b1eb;"></div>');
+				  $('#tooltip' + i).css('right',$(window).width() - $(v).offset().left - $(v).width() - 5 + 'px');
+				  $('#tooltip' + i).css('top',$(v).offset().top + $(v).height() + 10 + 'px');
+				  
+				  $('#tooltiparrow' + i).css('left',($(v).offset().left + $(v).width() / 2) + 'px');
+				  $('#tooltiparrow' + i).css('top',$(v).offset().top + $(v).height() + 5 + 'px');
+				  $('.footer').css('margin-bottom','15px');
+				  
+				  if(isMobile()) {
+					  if(i == 1){
+						  $('#tooltiparrow' + i).css('top',$(v).offset().top + $(v).height() + 10 + 'px');
+						  $('#tooltip' + i).css('top',$(v).offset().top + $(v).height() + 15 + 'px');
+					  }
+					  $('#tooltip' + i).css('right',$(window).width() - $(v).offset().left - $(v).width()+ 'px');
+						$('#tooltiparrow' + i).css('left',($(v).offset().left + $(v).width() / 2.5) + 'px');
+					  $('.tooltip').css('z-index',0);
+					  $('#tooltip' + i).addClass('mobile');
+					  $('#tooltiparrow' + i).addClass('mobile');
+				  }
+			  }
+		  });
+		  
+		  if(isMobile()) {
+			$('body').append('<div id="tooltippost" class="tooltip" style="z-index:9002;font-weight:bold;position:absolute;background:#65b1eb;color:#444;border-radius:2px;padding:10px 15px">Try tapping on a post for additional options.</div>');
+			$('body').append('<div id="tooltiparrowpost" class="tooltip" style="z-index:9002;position:absolute;width:0;height:0;border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid #65b1eb;"></div>');
+			$('#tooltippost').css('left','50%');
+			$('#tooltippost').css('width','250px');
+			$('#tooltippost').css('margin-left','-140px');
+			$('#tooltippost').css('top',$('.mobilePostReplyLink').first().offset().top + $('.mobilePostReplyLink').first().height() + 10 + 'px');
+			
+			$('#tooltiparrowpost').css('left','50%');
+			$('#tooltiparrowpost').css('top',$('.mobilePostReplyLink').first().offset().top + $('.mobilePostReplyLink').first().height() + 5 + 'px');
+		  }
+	  }
+      
       highlightPosts();
-    }
-
-    if (localStorage.getItem('embedMedia') == 'true') {
-      embedMedia();
-    }
+      
+      // thread gallery
+      //$('.threadlinks').append('[<a href="javascript:void(0)" class="gallerylink">Gallery Mode</a>]');
+      $('.gallerylink').on('click', function() {
+		  var thumblinks = $('.thumbLink');
+		  $('body').append('<div id="gallery-overlay" class="overlay" style="display:block;text-align:center;"></div>');
+		  thumblinks.each(function(i,v) {
+			  var tba = [
+				  '<a target="_blank" href="' + $(v).attr('href') + '" class="galleryimage" style="text-decoration:none">',
+				  '<img style="display:inline-block;margin: 15px;vertical-align: top;box-shadow: 0 0 2px rgba(0,0,0,0.5);max-width:150px" src="' + $(v).children('img').attr('src') + '">',
+				  '</a>'
+			  ].join('\n');
+			  $('#gallery-overlay').append(tba);
+		  });
+		  $('.galleryimage').on('click', function(e) {
+			  //e.preventDefault();
+		  });
+	  });
+	  
+      $(document).mouseup(function(e) {
+		  var container = $("#gallery-overlay");
+		  if ($('#gallery-overlay').css('display') == "block") {
+			if (container.has(e.target).length === 0) {
+			  $('#gallery-overlay').css('display','none');
+			  $('#gallery-overlay').remove();
+			}
+		  }
+	  });
+  }
+    
+    if(localStorage.getItem('embedMedia') == 'true') {
+		embedMedia();
+	}
     if (localStorage.getItem('markPosts') == 'true') {
       markPosts();
     }
@@ -892,25 +920,26 @@ function makeReverseSearchLinks() {
 }
 
 function embedMedia() {
-  var links = [];
-  var re = /^(?:www\.)?youtu(?:be)?\.[a-z.]{2,6}$/;
-  $('blockquote').find('a').not('postlink').each(function (i, v) {
-    if (re.test(v.host)) {
-      $(v).on('click', function (e) {
-        e.preventDefault();
-        if ($(v).next('.embed').length == 0) {
-          var id = v.href.match(/(?:\/watch\?v\=|\.be\/)(.{11})/);
-          $(v).after('<div class="embed"><iframe width="560" height="315" src="//www.youtube.com/embed/' + id[1] + '" frameborder="0" allowfullscreen></iframe></div>');
-          if (isMobile()) {
-            $('.embed').children('iframe').attr('height', '');
-            $('.embed').children('iframe').width($('.embed').parentsUntil('.post').parent().width() - $('.embed').offset().left - 5);
-          }
-        } else {
-          $(v).next('.embed').remove();
-        }
-      });
-    }
-  });
+	var links = [];
+	var re = /^(?:www\.)?youtu(?:be)?\.[a-z.]{2,6}$/;
+	$('blockquote').find('a').not('postlink').each(function(i,v) {
+		if(re.test(v.host)) {
+			$(v).on('click',function(e) {
+				e.preventDefault();
+				if($(v).next('.embed').length == 0) {
+					var id = v.href.match(/(?:\/watch\?v\=|\.be\/)(.{11})/);
+					$(v).after('<div class="embed"><iframe width="560" height="315" src="//www.youtube.com/embed/' + id[1] + '" frameborder="0" allowfullscreen></iframe></div>');
+					if(isMobile()) {
+							$('.embed').children('iframe').attr('height','');
+						  $('.embed').children('iframe').width($('.embed').parentsUntil('.post').parent().width() - $('.embed').offset().left - 5);
+					  }
+				}
+				else {
+					$(v).next('.embed').remove();
+				}
+			});
+		}
+	});
 }
 
 function expandPost(link) {
@@ -1080,6 +1109,10 @@ function ajaxSuccess() {
     $responseObj = $(data);
     document.getElementById("qr-error").innerHTML = $responseObj.filter('#errorMessage').html();
     document.getElementById("qrfield3s").value = "Submit";
+    
+    if ((sitevars.captcha == 1) && (sitevars.admin === undefined)) {
+      Recaptcha.reload("t");
+    }
   }
 }
 
@@ -1223,7 +1256,7 @@ function updateThread() {
             $.when.apply(null, deferreds).then(function () {
               if (newPosts.length > 0) {
                 if (postsInTitle == 0) {
-                  $('.reply').last().attr('class', 'reply unreadMarker');
+                  $('.reply').last().attr('class', 'reply unreadMarker post');
                   $('.reply').last().css('box-shadow', '0 3px red');
                 }
                 $('.thread').append(newPosts);
@@ -1265,7 +1298,7 @@ function makeReply(data, callback) {
   }
   if ((localStorage['replytemplate'] != null) && (localStorage['replytemplate_ver'] == replytemplatever)) {
     $(reply).jqoteapp(localStorage['replytemplate'], data);
-    $(reply).find('.reply').attr('class', 'reply newPost');
+    $(reply).find('.reply').attr('class', 'reply newPost post');
     callback(reply.firstElementChild);
   } else {
     $.ajax({
@@ -1275,7 +1308,7 @@ function makeReply(data, callback) {
         localStorage['replytemplate'] = tpl;
         localStorage['replytemplate_ver'] = replytemplatever;
         $(reply).jqoteapp(tpl, data);
-        $(reply).find('.reply').attr('class', 'reply newPost');
+        $(reply).find('.reply').attr('class', 'reply post');
         callback(reply.firstElementChild);
       }
     });

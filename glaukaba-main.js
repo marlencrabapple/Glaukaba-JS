@@ -270,13 +270,14 @@ window.onload = function (e) {
       } else if (event.target.nodeName == "BLOCKQUOTE") {
         $(this).parent().parent().children('.mobile-post-menu').toggle();
       }
+      $('#tooltippost,#tooltiparrowpost').hide();
     }
   });
-  $('.mobile-post-menu').on('tap', '.filter-button', function () {
+  $('.thread').on('tap', '.filter-button', function () {
     $(this).parent().children('.mobile-delete-menu').hide()
     $(this).parent().children('.mobile-filter-menu').toggle();
   });
-  $('.mobile-post-menu').on('tap', '.delete-button', function () {
+  $('.thread').on('tap', '.delete-button', function () {
     $(this).parent().children('.mobile-filter-menu').hide();
     $(this).parent().children('.mobile-delete-menu').toggle();
   });

@@ -1,31 +1,9 @@
 <div class="replyContainer" id="replyContainer<%= this.no %>">
 	<div class="doubledash">&gt;&gt;</div>
-	<div class="reply" id="reply<%= this.no %>">
+	<div class="reply post" id="reply<%= this.no %>">
 		<a id="<%= this.no %>"></a>
 		<div class="replyPostInfo"><input type="checkbox" name="delete" value="<%= this.no %>" />
 			<div class="leftblock">
-			<a href="javascript:void(0)" onclick="togglePostMenu(this);"  class="postMenuButton postMenuButtonMobile" id="postMenuButton<%= this.no %>Mobile"><span></span></a>
-			   <div class="postMenu" id="postMenu<%= this.no %>Mobile">
-					<a onmouseover="closeSub(this);" href="javascript:void(0)" onclick="reportPostPopup(<%= this.no %>, '<%= sitevars.boarddir %>')" class="postMenuItem">Report this post</a>
-					<div class="hasSubMenu" onmouseover="showSub(this);">
-						<span class="postMenuItem">Delete</span>
-						<div onmouseover="$(this).addClass('focused')" class="postMenu subMenu">
-							<a class="postMenuItem" href="javascript:void(0);" onclick="deletePost(<%= this.no %>);">Post</a>
-							<a class="postMenuItem" href="javascript:void(0);" onclick="deleteImage(<%= this.no %>);">Image</a>
-						</div>
-					</div>
-					<div class="hasSubMenu" onmouseover="showSub(this);">
-						<span class="postMenuItem">Filter</span>
-						<div class="postMenu subMenu">
-							<a class="postMenuItem" href="javascript:void(0);">Not yet implemented</a>
-						</div>
-					</div>
-				  <% if(sitevars.social==1){ %>
-					<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="facebookPost(<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Facebook</a>
-					<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="twitterPost(<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Twitter</a>
-				  <% } %>
-				  <a onmouseover="closeSub(this);" href="<%= sitevars.boardpath %>res/<%= this.parent %>#<%= this.no %>" class="postMenuItem" target="_blank">Permalink</a>
-			  </div>
 				<% if(this.sub){ %><span class="replytitle"><%= this.sub %></span><% } %>
 				<% if(this.email){ %><span class="postername"><a href="<%= this.email %>"><%= this.name %></a></span><% if(this.trip){ %><span class="postertrip"><a href="<%= this.email %>"><%= this.trip %></a></span><% } %><% } %>
 				<% if(!this.email){ %><span class="postername"><%= this.name %></span><% if(this.trip){ %> <span class="postertrip"><%= this.trip %></span><% } %><% } %>
@@ -56,7 +34,7 @@
 						<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="facebookPost(window.location.hostname,<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Facebook</a>
 						<a onmouseover="closeSub(this);" href="javascript:void(0);" onclick="twitterPost(window.location.hostname,<%= this.no %>,<%= this.parent %>)" class="postMenuItem">Post to Twitter</a>
 					<% } %>
-					<a href="<%= sitevars.boardpath %>res/<%= this.parent %>#<%= this.no %>" class="postMenuItem" target="_blank">Permalink</a>
+					<a href="<%= sitevars.boardpath %>res/<%= this.parent %><%= ext %>#<%= this.no %>" class="postMenuItem" target="_blank">Permalink</a>
 				</div>
 			</div>
 			<div style="clear:both"></div>
@@ -92,5 +70,25 @@
 		<blockquote>
 			<%= this.com %>
 		</blockquote>
+	</div>
+	<div class="mobile-post-menu mobile">
+		<a class="button" href="javascript:void(0)" onclick="reportPostPopup(<%= this.no %>, '<%= sitevars.boarddir %>')">Report</a>
+		<a class="button delete-button" href="javascript:void(0)">Delete</a>
+		<a class="button" href="<%= sitevars.boardpath %>res/<%= this.parent %><%= ext %>#<%= this.no %>">Link</a>
+		<a class="button filter-button" href="javascript:void(0)">Filter</a>
+		<div class="mobile-filter-menu">
+			By:
+			<% if(this.name != 'Anonymous') { %><a class="button" href="javascript:void(0)" onclick="addFilter('name','reply<%= this.no %>')">Name</a><% } %>
+			<% if(this.trip) { %><a class="button" href="javascript:void(0)" onclick="addFilter('trip','reply<%= this.no %>')">Trip</a><% } %>
+			<% if(this.subject) { %><a class="button" href="javascript:void(0)" onclick="addFilter('subject','reply<%= this.no %>')">Subject</a><% } %>
+			<% if(this.filename) { %><a class="button" href="javascript:void(0)" onclick="addFilter('fname','reply<%= this.no %>')">Filename</a><% } %>
+			<% if(this.md5) { %><a class="button" href="javascript:void(0)" onclick="addFilter('md5','reply<%= this.no %>')">MD5</a><% } %>
+			<% if(this.com) { %><a class="button" href="javascript:void(0)" onclick="addFilter('com','reply<%= this.no %>')">Comment</a><% } %>
+		</div>
+		<div class="mobile-delete-menu">
+			<a class="button" href="javascript:void(0)" onclick="deletePost(<%= this.no %>,0)">Post</a>
+			<a class="button" href="javascript:void(0)" onclick="deletePost(<%= this.no %>,1)">File Only</a>
+			<input type="password" id="mobile-delpass-<%= this.no %>" class="pass-field postInput" value="<%= get_password("password") %>">
+		</div>
 	</div>
 </div>
