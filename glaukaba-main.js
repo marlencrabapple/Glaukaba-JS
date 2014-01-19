@@ -126,7 +126,7 @@ function hide_captcha() {
       if (sitevars.noext == 1) {
         logouturl = sitevars.domain + "pass/logout";
       }
-      $($("#recaptchaContainer").children(".postField")[0]).html('<div style="padding: 5px;">You are using a ' + sitevars.sitename + ' pass. [<a href="' + logouturl + '">Logout</a>]</div>');
+      $($("#recaptchaContainer").children(".colspan").children('.postField')).html('<div style="padding: 5px;">You are using a ' + sitevars.sitename + ' pass. [<a href="' + logouturl + '">Logout</a>]</div>');
       hasPass = 1;
     } else {
       hasPass = 0;
