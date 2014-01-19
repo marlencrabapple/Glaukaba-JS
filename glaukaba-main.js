@@ -1,4 +1,5 @@
-! function (r, t) {
+!
+function (r, t) {
   "use strict";
   var d = t.support.touch = !! ("ontouchstart" in window || window.DocumentTouch && r instanceof DocumentTouch),
     e = "._tap",
@@ -9,28 +10,32 @@
     s = function (n, e) {
       var c;
       return c = Array.prototype.indexOf ? n.indexOf(e) : t.inArray(e, n)
-    }, n = {
+    },
+    n = {
       $el: null,
       x: 0,
       y: 0,
       count: 0,
       cancel: !1,
       start: 0
-    }, u = function (o, i) {
+    },
+    u = function (o, i) {
       var n = i.originalEvent,
         c = t.Event(n),
         r = n.changedTouches ? n.changedTouches[0] : n;
       c.type = o;
       for (var e = 0, u = a.length; u > e; e++) c[a[e]] = r[a[e]];
       return c
-    }, g = function (t) {
+    },
+    g = function (t) {
       var o = t.originalEvent,
         e = t.changedTouches ? t.changedTouches[0] : o.changedTouches[0],
         i = Math.abs(e.pageX - n.x),
         a = Math.abs(e.pageY - n.y),
         r = Math.max(i, a);
       return Date.now() - n.start < l && f > r && !n.cancel && 1 === n.count && c.isTracking
-    }, c = {
+    },
+    c = {
       isEnabled: !1,
       isTracking: !1,
       enable: function () {
@@ -150,7 +155,7 @@ function insert(text) {
 function highlight(post) {
   var cells = document.getElementsByTagName("div");
   for (var i = 0; i < cells.length; i++)
-    if (cells[i].className == "reply highlight") cells[i].className = "reply";
+  if (cells[i].className == "reply highlight") cells[i].className = "reply";
   var reply = document.getElementById("reply" + post);
   if (reply) {
     reply.className = "reply highlight";
@@ -242,11 +247,8 @@ window.onunload = function (e) {
 }
 window.onload = function (e) {
   var match;
-  if (match = /#i([0-9]+)/.exec(document.location.toString()))
-    if (!document.getElementById("field4").value)
-      insert(">>" + match[1]);
-  if (match = /#([0-9]+)/.exec(document.location.toString()))
-    highlight(match[1]);
+  if (match = /#i([0-9]+)/.exec(document.location.toString())) if (!document.getElementById("field4").value) insert(">>" + match[1]);
+  if (match = /#([0-9]+)/.exec(document.location.toString())) highlight(match[1]);
   if (window.location.href.indexOf("admin") == -1) {
     $("#boardList").children().each(function (option) {
       if ($(this).text() == "Select a board") {

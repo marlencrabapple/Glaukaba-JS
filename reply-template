@@ -68,7 +68,7 @@
 			<% } %>
 		<% } %>
 		<blockquote>
-			<%= this.com %>
+			<% if(this.com){ %> <%= this.com %> <% } %>
 		</blockquote>
 	</div>
 	<div class="mobile-post-menu mobile">
