@@ -284,6 +284,8 @@ function quotePreview() {
     previewinprogress = $.Deferred();
     $('div[id^=qp_]').remove();
     postlink = this;
+    postlinkid = "postlink" + Math.floor((Math.random()*100000)+1);
+    $(postlink).attr('id',postlinkid);
     crossboard = '';
     if ($(postlink).html().replace(/[^\/]/g, "").length == 2) {
       if ($(postlink).html().replace(/[^0-9]/g, "").length > 0) {
@@ -317,7 +319,7 @@ function quotePreview() {
     } else {
       quoted = $(postlink).attr('id').replace('backlink', '');
     }
-    if ($('#reply' + quoted).length == 0) {
+    if ($('#reply' + quoted + ",#parent" + quoted).length == 0) {
       cachedposts = getCache(parentnum);
       if (cachedposts) {
         $(cachedposts.posts).each(function (i, item) {
@@ -336,15 +338,20 @@ function quotePreview() {
             if (item.no == quoted) {
               item.crossboard = crossboard;
               makeReply(item, function (post) {
-                appendPreview(post, quoted);
-                previewinprogress.resolve();
+				console.log('#' + postlinkid);
+				if($('#' + postlinkid + ':hover').length != 0) {
+				//if($(postlink + ':hover').length != 0) {
+				  appendPreview(post, quoted);
+			    }
+			    previewinprogress.resolve();
               });
             }
           });
         });
       }
     } else {
-      post = $('#reply' + quoted).clone();
+      post = $('#reply' + quoted + ",#parent" + quoted).clone();
+      $(post).attr('class',$(post).attr('class').replace('parentPost','reply'));
       $(post).attr('id', 'qp_' + $(post).attr('id'));
       $(post).css('position', 'absolute');
       $(post).css('display', 'block');
@@ -375,7 +382,7 @@ function quotePreview() {
 
 function appendPreview(post, quoted) {
   post = $(post).children('.reply');
-  $(post).attr('id', 'qp_' + $(post).attr('id'));
+  $(post).attr('id', 'qp_' + $(post).attr('id').replace('parent','reply'));
   $(post).css('position', 'absolute');
   $(post).css('border', "1px solid #9E9E9E");
   $(post).css('display', 'block');
@@ -428,7 +435,7 @@ function inlineQuote() {
       quoted = $(postlink).attr('id').replace('backlink', '');
     }
     if (($(postlink).next('#iq_reply' + quoted).length == 0) && ($(postlink).parent().parent().parent('.parentPost, .reply').children('#iq_reply' + quoted).length == 0)) {
-      if ($('#reply' + quoted).length == 0) {
+      if ($('#reply' + quoted + ",#parent" + quoted).length == 0) {
         cachedposts = getCache(parentnum);
         if (cachedposts) {
           $(cachedposts.posts).each(function (i, item) {
@@ -455,8 +462,9 @@ function inlineQuote() {
           });
         }
       } else {
-        post = $('#reply' + quoted).clone();
-        $(post).attr('id', 'iq_' + $(post).attr('id'));
+        post = $('#reply' + quoted + ",#parent" + quoted).clone();
+		$(post).attr('class',$(post).attr('class').replace('parentPost','reply'));
+        $(post).attr('id', 'iq_' + $(post).attr('id').replace('parent','reply'));
         $(post).css('border', "1px solid #9E9E9E");
         $(post).find('div[id^=iq]').remove();
         if ($(post).find('a.thumbLink').children('img.expandedThumb').length) {
@@ -464,13 +472,14 @@ function inlineQuote() {
             expandImage(this)
           });
         }
-        if ($(postlink).next('#iq_reply' + quoted).length == 0) if ($(postlink).attr('class') != 'backlink') $(postlink).after(post);
-        else {
-          if (isMobile()) {
-            $(post).css('box-sizing', 'border-box');
+        if ($(postlink).next('#iq_reply' + quoted).length == 0)
+          if ($(postlink).attr('class') != 'backlink') $(postlink).after(post);
+          else {
+            if (isMobile()) {
+              $(post).css('box-sizing', 'border-box');
+            }
+            $(postlink).parent().parent().parent().children('blockquote').before(post);
           }
-          $(postlink).parent().parent().parent().children('blockquote').before(post);
-        }
         inlineinprogress.resolve();
       }
     } else {
@@ -864,7 +873,7 @@ function threadGallery() {
       var tba = ['<a target="_blank" href="' + $(v).attr('href') + '" class="galleryimage" style="text-decoration:none">', '<img style="display:inline-block;margin: 15px;vertical-align: top;box-shadow: 0 0 2px rgba(0,0,0,0.5);max-width:150px" src="' + $(v).children('img').attr('src') + '">', '</a>'].join('\n');
       $('#gallery-overlay').append(tba);
     });
-/*$('.galleryimage').on('click', function(e) {
+    /*$('.galleryimage').on('click', function(e) {
 		  e.preventDefault();
 	  });*/
   });
@@ -1072,22 +1081,60 @@ function setSubmitText() {
   document.getElementById("qrfield3s").value = "...";
 }
 
+function submitPost(form) {
+  setSubmitText();
+  var oReq = new XMLHttpRequest();
+  oReq.onload = ajaxSuccess;
+  oReq.open("post", sitevars.self, true);
+  oReq.send(form);
+}
+
 function formStuff() {
   $('#qr-form').parent().submit(function (e) {
-    var form = this;
-    var action = sitevars.self;
-    var formData = new FormData(this);
     e.preventDefault();
-    setSubmitText();
-    var oReq = new XMLHttpRequest();
-    oReq.onload = ajaxSuccess;
-    oReq.open("post", action, true);
-    oReq.send(new FormData(form));
+    var form = this;
+    var formdata = new FormData(form);
+
+    if ((sitevars.preval !== undefined) && (hasPass == 1) && (sitevars.admin !== undefined)) {
+      var prevalreq = {
+        task: "preval",
+        challenge: form.recaptcha_challenge_field.value,
+        response: form.recaptcha_response_field.value,
+        parent: $(form).find('input[name=parent]').val()
+      };
+
+      prevalreq = JSON.stringify(prevalreq);
+
+      $.ajax({
+        url: sitevars.self,
+        type: "POST",
+        data: prevalreq,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          if (data.key !== undefined) {
+            formdata.append('preval', data.key);
+            submitPost(formdata);
+          } else {
+            if (data.error !== undefined) {
+              document.getElementById("qr-error").innerHTML = data.error;
+            }
+            document.getElementById("qrfield3s").value = "Submit";
+
+            if ((sitevars.captcha == 1) && (sitevars.admin === undefined)) {
+              Recaptcha.reload("t");
+            }
+          }
+        }
+      });
+    } else {
+      submitPost(formdata);
+    }
   });
 }
 
 function ajaxSuccess() {
-  var yourPost = this.getResponseHeader('Your-Post');
+  var yourPost = this.responseText;
   var data = this.responseText;
   if (data.indexOf("errorMessage") == -1) {
     yourPost = JSON.parse(yourPost);
