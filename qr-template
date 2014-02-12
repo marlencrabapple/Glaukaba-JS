@@ -13,6 +13,7 @@
 <div class="sub-row">
 <input class="postInput" type="text" name="field3" placeholder="Subject">
 <input type="submit" value="Submit" id="qrfield3s">
+<div style="clear:both"></div>
 </div>
 <textarea class="postInput" rows="4" name="field4" placeholder="Comment"><%= this.ref %></textarea>
 <% if(this.captcha == 1) { %>

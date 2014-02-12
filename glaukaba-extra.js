@@ -13,7 +13,7 @@ var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
 var replytemplatever = 11.3;
-var qrtemplatever = 1.4;
+var qrtemplatever = 1.5;
 var filtered = new Array();
 
 var observer = new MutationObserver(function (mutations) {
@@ -285,7 +285,6 @@ function quotePreview() {
     $('div[id^=qp_]').remove();
     postlink = this;
     postlinkid = "postlink" + Math.floor((Math.random()*100000)+1);
-    $(postlink).attr('id',postlinkid);
     crossboard = '';
     if ($(postlink).html().replace(/[^\/]/g, "").length == 2) {
       if ($(postlink).html().replace(/[^0-9]/g, "").length > 0) {
@@ -299,6 +298,7 @@ function quotePreview() {
       }
     }
     if ($(postlink).attr('class') != 'backlink') {
+	  $(postlink).attr('id',postlinkid);
       href = $(postlink).attr('href');
       parentnum = href.substr(href.lastIndexOf('/') + 1, href.indexOf('#') - (href.lastIndexOf('/') + 1)).replace('.html', '');
       quoted = href.substr(href.indexOf('#') + 1);
@@ -338,7 +338,6 @@ function quotePreview() {
             if (item.no == quoted) {
               item.crossboard = crossboard;
               makeReply(item, function (post) {
-				console.log('#' + postlinkid);
 				if($('#' + postlinkid + ':hover').length != 0) {
 				//if($(postlink + ':hover').length != 0) {
 				  appendPreview(post, quoted);
@@ -1095,7 +1094,7 @@ function formStuff() {
     var form = this;
     var formdata = new FormData(form);
 
-    if ((sitevars.preval !== undefined) && (hasPass == 1) && (sitevars.admin !== undefined)) {
+    if ((sitevars.preval !== undefined) && (hasPass != 1) && (sitevars.admin === undefined)) {
       var prevalreq = {
         task: "preval",
         challenge: form.recaptcha_challenge_field.value,
