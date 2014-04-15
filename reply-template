@@ -48,7 +48,7 @@
 				</span>
 			</div>
 			<% if(this.tn_w){ %>
-				<a class="thumbLink" target="_blank" href="<%= sitevars.boardpath + this.image %>">
+				<a class="thumbLink" target="_blank" href="<%= sitevars.boardpath + this.image %>" data-width="<%= this.w %>" data-height="<%= this.h %>" data-tnwidth="<%= this.tn_w %>" data-tnheight="<%= this.tn_h %>">
 					<% if(!this.spoiler){ %>
 						<img src="<%= sitevars.boardpath + this.tnfname %>" alt="<%= this.size %>" class="thumb replyThumb" data-md5="<%= this.md5 %>" style="width: <%= this.tn_w*.504 %>px; height: <%= this.tn_h*.504 %>px;" />
 					<% } %>
@@ -63,7 +63,11 @@
 					<img src="<%= sitevars.domain %>img/deleted.png" alt="" class="thumb replyThumb deletedImg" /></a>
 				<% } %>
 				<% if(this.filename){ %>
-					<div class="thumb replyThumb nothumb"><a class="thumbLink" target="_blank" href="<%= sitevars.boardpath +  this.image %>">No Thumbnail</a></div>
+					<div class="thumb replyThumb nothumb">
+						<a class="thumbLink" target="_blank" href="<%= sitevars.boardpath +  this.image %>" data-width="<%= this.w %>" data-height="<%= this.h %>">
+							No Thumbnail
+						</a>
+					</div>
 				<% } %>
 			<% } %>
 		<% } %>

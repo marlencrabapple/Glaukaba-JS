@@ -12,8 +12,8 @@ var postsInTitle = 0;
 var finalDivScrollPos;
 var ext = ".html";
 var yourPosts = new Array();
-var replytemplatever = 11.3;
-var qrtemplatever = 1.5;
+var replytemplatever = 12;
+var qrtemplatever = 1.6;
 var filtered = new Array();
 
 var observer = new MutationObserver(function (mutations) {
@@ -266,7 +266,7 @@ function loadSavedSettings() {
 function imgExpPrep() {
   $("body").on("click", "a.thumbLink", function (e) {
     expandImage(this);
-    e.preventDefault();
+    return false;
   });
 }
 
@@ -1197,22 +1197,77 @@ function expandImage(thumbLink) {
   if (image.className.indexOf("expandedThumb") == -1) {
     var pageWidth = window.innerWidth;
     var offset = findPos(image);
-    image.src = thumbLink.href;
-    image.removeAttribute("style");
-    image.className += " expandedThumb";
-    image.onload = function () {
-      if (image.naturalWidth > pageWidth - offset) {
-        var difference = image.naturalWidth - (pageWidth - offset);
-        if (isMobile()) {
-          $(image).css('cssText', "width:" + ($(image).parentsUntil('.post').parent().width() - 20) + "px!important");
-        } else {
-          image.style.width = (image.naturalWidth - difference) - 100 + "px";
+    if(thumbLink.href.indexOf('.webm') == -1) {
+      image.src = thumbLink.href;
+      image.removeAttribute("style");
+      image.className += " expandedThumb";
+      image.onload = function () {
+        if (image.naturalWidth > pageWidth - offset) {
+          var difference = image.naturalWidth - (pageWidth - offset);
+          if (isMobile()) {
+            $(image).css('cssText', "width:" + ($(image).parentsUntil('.post').parent().width() - 20) + "px!important");
+          } else {
+            image.style.width = (image.naturalWidth - difference) - 100 + "px";
+          }
         }
       }
     }
+    else {
+      $(image).replaceWith(function() {
+        var video = document.createElement('video');
+        var naturalwidth = $(thumbLink).attr('data-width');
+        $(video).attr('src', thumbLink.href);
+        $(video).attr('autoplay', true);
+        $(video).attr('loop', true);
+        $(video).addClass('thumb');
+        $(video).addClass('expandedThumb');
+
+        if ($(image).hasClass('opThumb')) {
+          $(video).addClass('opThumb');
+        }
+
+        if (naturalwidth > pageWidth - offset) {
+          var difference = naturalwidth - (pageWidth - offset);
+          if (isMobile()) {
+            var mobilewidth = ($(image).parentsUntil('.post').parent().width() - 20);
+            $(video).css('cssText', "width:" + mobilewidth + "px!important");
+            $(video).attr('width',mobilewidth)
+          } else {
+            video.style.width = (naturalwidth - difference) - 100 + "px";
+            $(video).attr('width',video.style.width);
+          }
+        }
+
+        if((isMobile()) && (/WebKit/.test(navigator.userAgent)))
+          video.play();
+
+        return video;
+      });
+    }
   } else {
     var thumbFname = thumbLink.href.substring(thumbLink.href.lastIndexOf("src/") + 4, thumbLink.href.lastIndexOf("src/") + 17);
-    image.src = image.src.replace(/src\/[0-9]*\.[a-z]{3}/, 'thumb/' + thumbFname + 's.jpg');
+    if(thumbLink.href.indexOf('.webm') != -1) {
+      $(image).replaceWith(function() {
+        var replacement = document.createElement('img');
+        var sizefactor = 1;
+        $(replacement).addClass('thumb');
+        if ($(image).hasClass('opThumb')) {
+          $(replacement).addClass('opThumb');
+        }
+        else {
+          $(replacement).addClass('replythumb');
+          sizefactor = .504
+        }
+        replacement.src = sitevars.boardpath + 'thumb/' + thumbFname + 's.jpg';
+        replacement.style.width = $(thumbLink).attr('data-tnwidth') * sizefactor + "px";
+        replacement.style.height = $(thumbLink).attr('data-tnheight') * sizefactor + "px";
+
+        return replacement;
+      });
+    }
+    else {
+      image.src = image.src.replace(/src\/[0-9]*\.[a-z]{3,4}/, 'thumb/' + thumbFname + 's.jpg');
+    }
     image.removeAttribute("style");
     dicks = 1;
     if (image.className.indexOf("opThumb") == -1) {
@@ -1234,6 +1289,8 @@ function expandImage(thumbLink) {
       }
     }
   }
+
+  return true;
 }
 
 function expandAllImages() {
